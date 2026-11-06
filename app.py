@@ -42,43 +42,23 @@ def status():
     return jsonify({
         "service": "CyberSaathi API",
         "status": "ok"
-    })
-
+        )
+        )
 
 @app.route("/api/phishing-check", methods=["POST"])
 def phishing_check():
     data = request.get_json(silent=True) or {}
-    url = data.get("url", "").strip()
+    url = data.get("url", "")
 
-    if not url:
-        return jsonify({"error": "Please enter a URL"}), 400
+    if not isinstance(url, str) or not url.strip():
+        return jsonify({
+            "status": "Invalid URL",
+            "message": "Please enter a valid URL."
+        }), 400
 
-    suspicious_terms = [
-        "login-verify", "free-prize", "account-suspended",
-        "claim-reward", "password-reset"
-    ]
-
-    warnings = []
-
-    if not url.startswith(("http://", "https://")):
-        warnings.append("URL does not start with HTTP or HTTPS.")
-
-    if any(term in url.lower() for term in suspicious_terms):
-        warnings.append("URL contains wording commonly used in scams.")
-
-    if "@" in url:
-        warnings.append("URL contains an unusual @ character.")
-
-    return jsonify({
-        "status": "warning" if warnings else "review",
-        "warnings": warnings,
-        "message": (
-            "Potential warning signs found. Avoid entering personal details."
-            if warnings else
-            "No basic warning signs detected. This does not prove the website is safe."
-        )
-    })
-
+    result = scan_url(url)
+    return jsonify(result)
+    
 
 @app.route("/api/scam-check", methods=["POST"])
 def scam_check():
