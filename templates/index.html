@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberSaathi AI | Cyber Safety Platform</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f2f6fc;color:#18304d}
+header{background:#082b55;color:white;text-align:center;padding:25px}
+header h1{margin:0;font-size:32px}
+nav{background:#12477d;padding:15px;text-align:center}
+nav a{color:white;text-decoration:none;margin:0 12px;font-weight:bold}
+.hero{background:linear-gradient(120deg,#082b55,#147dbb);color:white;text-align:center;padding:65px 20px}
+.hero h2{font-size:34px}
+.container{max-width:1100px;margin:auto;padding:35px 20px}
+h2{text-align:center;color:#12477d;margin-bottom:25px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px}
+.card{background:white;padding:22px;border-radius:12px;box-shadow:0 3px 12px #0001}
+.card h3{color:#1263a0}
+input,select,textarea{width:100%;padding:12px;margin:8px 0 15px;border:1px solid #ccd7e3;border-radius:6px;font:inherit}
+textarea{min-height:100px}
+button,.btn{display:inline-block;background:#0878c9;color:white;border:0;padding:12px 20px;border-radius:7px;text-decoration:none;cursor:pointer}
+button:hover,.btn:hover{background:#075b99}
+.result{background:#e6f5ff;padding:14px;border-radius:8px;margin-top:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+form{background:white;padding:25px;border-radius:12px;max-width:650px;margin:auto}
+.notice{background:#fff4d9;padding:15px;border-left:4px solid #e5a000;margin-top:20px}
+footer{background:#082b55;color:white;text-align:center;padding:22px}
+</style>
+</head>
+<body>
+
+<header>
+<h1>🛡️ CyberSaathi AI</h1>
+<p>Your Companion for Cyber Safety and Awareness</p>
+</header>
+
+<nav>
+<a href="#home">Home</a>
+<a href="#awareness">Awareness</a>
+<a href="#tools">AI Tools</a>
+<a href="#complaint">Complaints</a>
+<a href="#resources">Resources</a>
+</nav>
+
+<section class="hero" id="home">
+<h2>Stay Alert. Stay Safe. Stay Cyber Aware.</h2>
+<p>Your digital safety starts with awareness.</p>
+<a class="btn" href="#tools">Explore Safety Tools</a>
+</section>
+
+<section class="container" id="awareness">
+<h2>Cyber Awareness</h2>
+<div class="grid">
+<div class="card"><h3>🎣 Phishing Attacks</h3><p>Learn to identify fake emails, messages and suspicious links.</p></div>
+<div class="card"><h3>💳 Online Fraud</h3><p>Understand payment scams and fraudulent financial requests.</p></div>
+<div class="card"><h3>🪪 Identity Theft</h3><p>Protect personal information and never share confidential details.</p></div>
+<div class="card"><h3>📱 Social Media Safety</h3><p>Use privacy settings and avoid sharing sensitive information.</p></div>
+<div class="card"><h3>🔐 Password Safety</h3><p>Use strong passwords and two-factor authentication.</p></div>
+<div class="card"><h3>🌐 Safe Browsing</h3><p>Check website addresses before opening unknown links.</p></div>
+</div>
+</section>
+
+<section class="container" id="tools">
+<h2>CyberSaathi Safety Tools</h2>
+<div class="grid">
+
+<div class="card">
+<h3>🔎 Phishing Awareness Checker</h3>
+<p>Check a URL for basic suspicious patterns.</p>
+<input id="urlInput" placeholder="Enter website URL">
+<button onclick="checkPhishing()">Check URL</button>
+<div id="urlResult" class="result" hidden></div>
+</div>
+
+<div class="card">
+<h3>🚨 Scam Message Checker</h3>
+<p>Review a message for common scam warning signs.</p>
+<textarea id="scamInput" placeholder="Paste suspicious message"></textarea>
+<button onclick="checkScam()">Check Message</button>
+<div id="scamResult" class="result" hidden></div>
+</div>
+
+<div class="card">
+<h3>💡 Daily Cyber Tips</h3>
+<p>Get useful tips to improve your online safety.</p>
+<button onclick="getTips()">Show Tips</button>
+<div id="tipsResult" class="result" hidden></div>
+</div>
+
+<div class="card">
+<h3>🤖 Cyber Assistant</h3>
+<p>Ask questions about cyber safety.</p>
+<input id="questionInput" placeholder="Ask a cyber safety question">
+<button onclick="askAssistant()">Ask Assistant</button>
+<div id="assistantResult" class="result" hidden></div>
+</div>
+
+</div>
+</section>
+
+<section class="container" id="complaint">
+<h2>Cybercrime Complaint Assistance</h2>
+<form id="complaintForm">
+<label>Complaint Type</label>
+<select id="complaintType" required>
+<option value="">Select complaint type</option>
+<option>Online Financial Fraud</option>
+<option>Phishing</option>
+<option>Social Media Harassment</option>
+<option>Identity Theft</option>
+<option>Other Cybercrime</option>
+</select>
+
+<label>Incident Description</label>
+<textarea id="description" required placeholder="Describe the incident"></textarea>
+
+<label>Incident Date</label>
+<input type="date" id="incidentDate">
+
+<button type="submit">Submit to CyberSaathi</button>
+<div id="complaintResult" class="result" hidden></div>
+</form>
+<div class="notice">
+<strong>Important:</strong> This is a project demonstration database, not an official police complaint registration system. Use the official government portal to report incidents.
+</div>
+</section>
+
+<section class="container" id="resources">
+<h2>Official Cybercrime Resources</h2>
+<div class="grid">
+<div class="card">
+<h3>Government Cybercrime Portal</h3>
+<p>Official Indian cybercrime reporting website.</p>
+<a class="btn" href="https://cybercrime.gov.in/" target="_blank" rel="noopener">Visit Portal</a>
+</div>
+<div class="card">
+<h3>Cybercrime Helpline</h3>
+<p>Call 1930 for assistance with financial cyber fraud in India.</p>
+</div>
+<div class="card">
+<h3>Cyber Safety Education</h3>
+<p>Learn how to recognize online risks and protect your information.</p>
+</div>
+</div>
+</section>
+
+<footer>
+<p>© 2026 CyberSaathi AI | Cyber Awareness Project</p>
+<p>Think Before You Click. Stay Cyber Safe!</p>
+</footer>
+
+<script>
+async function api(url,data){
+const response=await fetch(url,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify(data)
+});
+const result=await response.json();
+if(!response.ok)throw new Error(result.error||"Request failed");
+return result;
+}
+
+async function runAction(resultId,action){
+const box=document.getElementById(resultId);
+box.hidden=false;
+box.textContent="Please wait...";
+try{box.textContent=await action();}
+catch(error){box.textContent="Error: "+error.message;}
+}
+
+function checkPhishing(){
+runAction("urlResult",async()=>{
+const r=await api("/api/phishing-check",{url:document.getElementById("urlInput").value});
+return r.message+"\n"+(r.warnings||[]).join("\n");
+});
+}
+
+function checkScam(){
+runAction("scamResult",async()=>{
+const r=await api("/api/scam-check",{message:document.getElementById("scamInput").value});
+return r.message+"\nWarning signs: "+(r.warning_signs||[]).join(", ");
+});
+}
+
+function getTips(){
+runAction("tipsResult",async()=>{
+const r=await fetch("/api/tips");
+const data=await r.json();
+return data.tips.map((tip,i)=>(i+1)+". "+tip).join("\n");
+});
+}
+
+function askAssistant(){
+runAction("assistantResult",async()=>{
+const r=await api("/api/assistant",{question:document.getElementById("questionInput").value});
+return r.answer;
+});
+}
+
+document.getElementById("complaintForm").addEventListener("submit",async function(e){
+e.preventDefault();
+runAction("complaintResult",async()=>{
+const r=await api("/api/complaints",{
+type:document.getElementById("complaintType").value,
+description:document.getElementById("description").value,
+date:document.getElementById("incidentDate").value
+});
+return r.message+"\nReference ID: "+r.reference+
+"\nOfficial reporting: "+r.official_portal;
+});
+});
+</script>
+</body>
+</html>
