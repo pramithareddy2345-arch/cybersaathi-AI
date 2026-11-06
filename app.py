@@ -200,18 +200,89 @@ def track_complaint(reference):
 create_database()
 
 # URL SCANNER API
-@app.route("/api/scan-url", methods=["POST"])
-def scan_url_api():
-    data = request.get_json(silent=True) or {}
-    url = data.get("url", "")
 
-    if not isinstance(url, str) or not url.strip():
-        return jsonify({
-            "error": "Please enter a valid URL"
-        }), 400
+def scan_url(url):
+    import re
+    from urllib.parse import urlparse
 
-    result = scan_url(url)
-    return jsonify(result)
+    url = url.strip()
+
+    if not url or any(char.isspace() for char in url):
+        return {
+            "status": "Invalid URL",
+            "message": "Please enter a valid URL."
+        }
+
+    if not url.startswith(("http://", "https://")):
+        url = "https://" + url
+
+    try:
+        parsed = urlparse(url)
+        hostname = (parsed.hostname or "").lower()
+
+        # Validate hostname
+        if (
+            not hostname
+            or "." not in hostname
+            or not re.fullmatch(r"[a-z0-9.-]+", hostname)
+            or ".." in hostname
+            or hostname.startswith(".")
+            or hostname.endswith(".")
+        ):
+            return {
+                "status": "Invalid URL",
+                "message": "The URL format is invalid."
+            }
+
+        # Reject URLs containing embedded login credentials
+        if parsed.username or parsed.password:
+            return {
+                "status": "Potential Warning Signs Found",
+                "message": "This URL contains embedded login credentials. Check it carefully."
+            }
+
+        # Check for suspicious domain patterns
+        if hostname.startswith("xn--") or ".xn--" in hostname:
+            return {
+                "status": "Potential Warning Signs Found",
+                "message": "This domain uses encoded characters. Verify it carefully."
+            }
+
+        trusted_domains = [
+            "youtube.com",
+            "google.com",
+            "microsoft.com",
+            "wikipedia.org"
+        ]
+
+        recognized = any(
+            hostname == domain or hostname.endswith("." + domain)
+            for domain in trusted_domains
+        )
+
+        if parsed.scheme != "https":
+            return {
+                "status": "Potential Warning Signs Found",
+                "message": "This URL does not use HTTPS encryption."
+            }
+
+        if not recognized:
+            return {
+                "status": "Potential Warning Signs Found",
+                "message": "This domain is not in the scanner's recognized-domain list. Verify it before visiting."
+            }
+
+        return {
+            "status": "No Basic Warning Signs Detected",
+            "message": "No basic warning signs detected. This does not prove the website is safe."
+        }
+
+    except ValueError:
+        return {
+            "status": "Invalid URL",
+            "message": "Unable to process this URL."
+        }
+        
     
 
 if __name__ == "__main__":
