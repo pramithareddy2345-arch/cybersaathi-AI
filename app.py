@@ -42,7 +42,7 @@ def status():
     return jsonify({
         "service": "CyberSaathi API",
         "status": "ok"
-        )
+    }
         )
 
 @app.route("/api/phishing-check", methods=["POST"])
