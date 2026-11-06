@@ -199,5 +199,20 @@ def track_complaint(reference):
 
 create_database()
 
+# URL SCANNER API
+@app.route("/api/scan-url", methods=["POST"])
+def scan_url_api():
+    data = request.get_json(silent=True) or {}
+    url = data.get("url", "")
+
+    if not isinstance(url, str) or not url.strip():
+        return jsonify({
+            "error": "Please enter a valid URL"
+        }), 400
+
+    result = scan_url(url)
+    return jsonify(result)
+    
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
