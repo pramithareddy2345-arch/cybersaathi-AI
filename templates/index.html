@@ -5,27 +5,201 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CyberSaathi AI | Cyber Safety Platform</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f2f6fc;color:#18304d}
-header{background:#082b55;color:white;text-align:center;padding:25px}
-header h1{margin:0;font-size:32px}
-nav{background:#12477d;padding:15px;text-align:center}
-nav a{color:white;text-decoration:none;margin:0 12px;font-weight:bold}
-.hero{background:linear-gradient(120deg,#082b55,#147dbb);color:white;text-align:center;padding:65px 20px}
-.hero h2{font-size:34px}
-.container{max-width:1100px;margin:auto;padding:35px 20px}
-h2{text-align:center;color:#12477d;margin-bottom:25px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px}
-.card{background:white;padding:22px;border-radius:12px;box-shadow:0 3px 12px #0001}
-.card h3{color:#1263a0}
-input,select,textarea{width:100%;padding:12px;margin:8px 0 15px;border:1px solid #ccd7e3;border-radius:6px;font:inherit}
-textarea{min-height:100px}
-button,.btn{display:inline-block;background:#0878c9;color:white;border:0;padding:12px 20px;border-radius:7px;text-decoration:none;cursor:pointer}
-button:hover,.btn:hover{background:#075b99}
-.result{background:#e6f5ff;padding:14px;border-radius:8px;margin-top:12px;white-space:pre-wrap;overflow-wrap:anywhere}
-form{background:white;padding:25px;border-radius:12px;max-width:650px;margin:auto}
-.notice{background:#fff4d9;padding:15px;border-left:4px solid #e5a000;margin-top:20px}
-footer{background:#082b55;color:white;text-align:center;padding:22px}
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0b1628;
+    color: #f1f5f9;
+}
+
+header {
+    background: #07152b;
+    color: #ffffff;
+    text-align: center;
+    padding: 25px;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 32px;
+    color: #ffffff;
+}
+
+nav {
+    background: #12345a;
+    padding: 15px;
+    text-align: center;
+}
+
+nav a {
+    color: #ffffff;
+    text-decoration: none;
+    margin: 0 12px;
+    font-weight: bold;
+}
+
+nav a:hover {
+    color: #38d9ff;
+}
+
+.hero {
+    background: linear-gradient(120deg, #07152b, #075985);
+    color: #ffffff;
+    text-align: center;
+    padding: 65px 20px;
+}
+
+.hero h2 {
+    font-size: 34px;
+    color: #67e8f9;
+}
+
+.hero p {
+    color: #ffffff;
+}
+
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 35px 20px;
+}
+
+h2 {
+    text-align: center;
+    color: #38bdf8;
+    margin-bottom: 25px;
+}
+
+h3 {
+    color: #38bdf8;
+}
+
+p, label, li {
+    color: #e2e8f0;
+    line-height: 1.6;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: #172a43;
+    color: #f1f5f9;
+    padding: 22px;
+    border-radius: 12px;
+    border: 1px solid #294765;
+    box-shadow: 0 3px 12px #0005;
+}
+
+.card h3 {
+    color: #67e8f9;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0 15px;
+    border: 1px solid #64748b;
+    border-radius: 6px;
+    font: inherit;
+    background: #ffffff;
+    color: #14243a;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #64748b;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: 2px solid #38bdf8;
+}
+
+textarea {
+    min-height: 100px;
+}
+
+button, .btn {
+    display: inline-block;
+    background: #0284c7;
+    color: #ffffff;
+    border: 0;
+    padding: 12px 20px;
+    border-radius: 7px;
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover, .btn:hover {
+    background: #0369a1;
+}
+
+.result {
+    background: #123b59;
+    color: #ffffff;
+    padding: 14px;
+    border-radius: 8px;
+    margin-top: 12px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    border: 1px solid #38bdf8;
+}
+
+form {
+    background: #172a43;
+    color: #ffffff;
+    padding: 25px;
+    border-radius: 12px;
+    max-width: 650px;
+    margin: auto;
+    border: 1px solid #294765;
+}
+
+.notice {
+    background: #493719;
+    color: #fff4d6;
+    padding: 15px;
+    border-left: 4px solid #fbbf24;
+    margin-top: 20px;
+}
+
+footer {
+    background: #07152b;
+    color: #ffffff;
+    text-align: center;
+    padding: 22px;
+}
+
+footer p {
+    color: #ffffff;
+}
+
+a {
+    color: #38bdf8;
+}
+
+@media (max-width: 600px) {
+    header h1 {
+        font-size: 25px;
+    }
+
+    .hero h2 {
+        font-size: 27px;
+    }
+
+    nav a {
+        display: inline-block;
+        margin: 6px;
+    }
+}
 </style>
 </head>
 <body>
