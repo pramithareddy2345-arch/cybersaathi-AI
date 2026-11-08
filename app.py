@@ -176,7 +176,144 @@ def track_complaint(reference):
         return jsonify({"error": "Reference not found"}), 404
 
     return jsonify(dict(complaint))
+@app.route("/admin", methods=["GET"])
+def admin():
+    if not session.get("admin_logged_in"):
+        return redirect(url_for("admin_login"))
 
+    connection = get_db()
+    complaints = connection.execute("""
+        SELECT * FROM complaints
+        ORDER BY id DESC
+    """).fetchall()
+    connection.close()
+
+    return render_template_string("""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>CyberSaathi Admin Dashboard</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            body {
+                font-family: Arial;
+                background: #0b1628;
+                color: white;
+                padding: 20px;
+            }
+            h1 { color: #38bdf8; }
+            .complaint {
+                background: #172a43;
+                padding: 18px;
+                margin: 15px 0;
+                border-radius: 10px;
+                border: 1px solid #38bdf8;
+                overflow-wrap: anywhere;
+            }
+            a, button {
+                background: #0284c7;
+                color: white;
+                padding: 10px 16px;
+                text-decoration: none;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+            }
+            .empty { color: #fbbf24; }
+        </style>
+    </head>
+    <body>
+        <h1>🛡️ CyberSaathi Admin Dashboard</h1>
+        <h3>Total Complaints: {{ complaints|length }}</h3>
+        <a href="{{ url_for('admin_logout') }}">Logout</a>
+
+        {% if complaints %}
+            {% for c in complaints %}
+                <div class="complaint">
+                    <h3>Complaint #{{ c.id }}</h3>
+                    <p><b>Reference ID:</b> {{ c.reference }}</p>
+                    <p><b>Type:</b> {{ c.complaint_type }}</p>
+                    <p><b>Description:</b> {{ c.description }}</p>
+                    <p><b>Incident Date:</b> {{ c.incident_date or 'Not provided' }}</p>
+                    <p><b>Submitted:</b> {{ c.created_at }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty">No complaints submitted yet.</p>
+        {% endif %}
+    </body>
+    </html>
+    """, complaints=complaints)
+
+
+@app.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    if not ADMIN_PASSWORD:
+        return "Admin password is not configured.", 503
+
+    if request.method == "POST":
+        password = request.form.get("password", "")
+
+        if password == ADMIN_PASSWORD:
+            session["admin_logged_in"] = True
+            return redirect(url_for("admin"))
+
+        return "Incorrect password. Please go back and try again.", 401
+
+    return render_template_string("""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>CyberSaathi Admin Login</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            body {
+                background: #0b1628;
+                color: white;
+                font-family: Arial;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 90vh;
+            }
+            form {
+                background: #172a43;
+                padding: 30px;
+                border-radius: 12px;
+                width: 300px;
+            }
+            input {
+                width: 100%;
+                padding: 12px;
+                margin: 15px 0;
+                box-sizing: border-box;
+            }
+            button {
+                background: #0284c7;
+                color: white;
+                padding: 12px;
+                border: none;
+                width: 100%;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>
+        <form method="POST">
+            <h2>🛡️ Admin Login</h2>
+            <input type="password" name="password"
+                   placeholder="Enter Admin Password" required>
+            <button type="submit">Login</button>
+        </form>
+    </body>
+    </html>
+    """)
+
+
+@app.route("/admin/logout")
+def admin_logout():
+    session.pop("admin_logged_in", None)
+    return redirect(url_for("admin_login"))
 
 create_database()
 
