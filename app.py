@@ -5,7 +5,8 @@ import uuid
 from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "change-this-secret-key")
+app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(32)
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
 
 DATABASE = "cybersaathi.db"
 
