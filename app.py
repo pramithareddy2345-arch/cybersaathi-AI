@@ -1,3 +1,4 @@
+        
 import os
 import re
 import hmac
@@ -10,17 +11,24 @@ import ipaddress
 
 from datetime import datetime
 from urllib.parse import urlparse
+
 from flask import (
     Flask, render_template, request, jsonify,
     session, redirect, url_for, render_template_string,
     make_response
 )
 
-app = Flask(__name__)
+from werkzeug.security import (
+    generate_password_hash,
+    check_password_hash
+)
+
 
 # ==========================================
 # 1. CONFIGURATION & SECURITY
 # ==========================================
+
+app = Flask(__name__)
 
 app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
 
@@ -47,7 +55,8 @@ app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
     SESSION_COOKIE_SECURE=os.environ.get("RENDER") == "true",
-    MAX_CONTENT_LENGTH=1024 * 1024
+    MAX_CONTENT_LENGTH=1024 * 1024,
+    PERMANENT_SESSION_LIFETIME=60 * 60 * 24
 )
 
 
@@ -66,15 +75,39 @@ def is_admin():
     return session.get("admin_logged_in") is True
 
 
+def current_user():
+    user_id = session.get("user_id")
+
+    if not user_id:
+        return None
+
+    connection = get_db()
+
+    user = connection.execute("""
+        SELECT id, name, email
+        FROM users
+        WHERE id = ?
+    """, (user_id,)).fetchone()
+
+    connection.close()
+
+    return user
+
+
 def csrf_token():
     if "csrf_token" not in session:
         session["csrf_token"] = secrets.token_urlsafe(32)
+
     return session["csrf_token"]
 
 
 def verify_csrf(token):
     saved = session.get("csrf_token", "")
-    return bool(saved) and hmac.compare_digest(saved, token or "")
+
+    return bool(saved) and hmac.compare_digest(
+        saved,
+        token or ""
+    )
 
 
 # ==========================================
@@ -86,8 +119,10 @@ def get_db():
         DATABASE,
         timeout=15
     )
+
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA foreign_keys = ON")
+
     return connection
 
 
@@ -97,6 +132,18 @@ def create_database():
 
     connection = get_db()
 
+    # USER TABLE
+    connection.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL UNIQUE,
+            password_hash TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        )
+    """)
+
+    # COMPLAINT TABLE
     connection.execute("""
         CREATE TABLE IF NOT EXISTS complaints (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -106,11 +153,12 @@ def create_database():
             incident_date TEXT,
             created_at TEXT,
             status TEXT DEFAULT 'Pending',
-            admin_note TEXT DEFAULT ''
+            admin_note TEXT DEFAULT '',
+            user_id INTEGER REFERENCES users(id)
         )
     """)
 
-    # Migrate existing databases safely.
+    # MIGRATE EXISTING DATABASE
     columns = {
         row["name"]
         for row in connection.execute(
@@ -130,6 +178,12 @@ def create_database():
             ADD COLUMN admin_note TEXT DEFAULT ''
         """)
 
+    if "user_id" not in columns:
+        connection.execute("""
+            ALTER TABLE complaints
+            ADD COLUMN user_id INTEGER REFERENCES users(id)
+        """)
+
     connection.execute("""
         CREATE INDEX IF NOT EXISTS idx_complaint_reference
         ON complaints(reference)
@@ -140,12 +194,22 @@ def create_database():
         ON complaints(status)
     """)
 
+    connection.execute("""
+        CREATE INDEX IF NOT EXISTS idx_complaint_user
+        ON complaints(user_id)
+    """)
+
+    connection.execute("""
+        CREATE INDEX IF NOT EXISTS idx_user_email
+        ON users(email)
+    """)
+
     connection.commit()
     connection.close()
 
 
 # ==========================================
-# 3. HOME PAGE
+# 3. HOME PAGE & API STATUS
 # ==========================================
 
 @app.route("/")
@@ -158,12 +222,524 @@ def status():
     return jsonify({
         "service": "CyberSaathi AI",
         "status": "ok",
-        "version": "2.0"
+        "version": "3.0"
     })
 
 
 # ==========================================
-# 4. PHISHING URL SCANNER
+# 4. USER REGISTRATION
+# ==========================================
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+
+    if current_user():
+        return redirect(url_for("user_dashboard"))
+
+    if request.method == "POST":
+
+        if not verify_csrf(request.form.get("csrf_token", "")):
+            return "Invalid request. Refresh and try again.", 400
+
+        name = request.form.get("name", "").strip()
+        email = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "")
+
+        if not name or len(name) > 80:
+            return "Enter a valid name.", 400
+
+        if len(email) > 254 or not re.fullmatch(
+            r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}",
+            email
+        ):
+            return "Enter a valid email address.", 400
+
+        if len(password) < 8 or len(password) > 128:
+            return "Password must be between 8 and 128 characters.", 400
+
+        password_hash = generate_password_hash(password)
+
+        connection = get_db()
+
+        try:
+            connection.execute("""
+                INSERT INTO users (
+                    name,
+                    email,
+                    password_hash,
+                    created_at
+                )
+                VALUES (?, ?, ?, ?)
+            """, (
+                name,
+                email,
+                password_hash,
+                datetime.now().isoformat(timespec="seconds")
+            ))
+
+            connection.commit()
+
+            user = connection.execute("""
+                SELECT id FROM users WHERE email = ?
+            """, (email,)).fetchone()
+
+        except sqlite3.IntegrityError:
+            connection.close()
+            return "An account with this email already exists.", 409
+
+        except sqlite3.Error:
+            connection.rollback()
+            connection.close()
+
+            app.logger.exception("Registration failed")
+
+            return "Unable to create account. Please try again.", 500
+
+        connection.close()
+
+        session.clear()
+        session["user_id"] = user["id"]
+        session.permanent = True
+        csrf_token()
+
+        return redirect(url_for("user_dashboard"))
+
+    token = csrf_token()
+
+    return render_template_string("""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>CyberSaathi Registration</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <style>
+            * { box-sizing: border-box; }
+
+            body {
+                background: #081426;
+                color: white;
+                font-family: Arial;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                margin: 0;
+                padding: 20px;
+            }
+
+            form {
+                background: #172a43;
+                padding: 30px;
+                border-radius: 12px;
+                width: 100%;
+                max-width: 420px;
+                border: 1px solid #38bdf8;
+            }
+
+            h2 { color: #67e8f9; }
+
+            input {
+                width: 100%;
+                padding: 13px;
+                margin: 9px 0 17px;
+                border-radius: 6px;
+                border: 0;
+            }
+
+            button {
+                width: 100%;
+                padding: 13px;
+                background: #0284c7;
+                color: white;
+                border: 0;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: bold;
+            }
+
+            a { color: #67e8f9; }
+        </style>
+    </head>
+
+    <body>
+        <form method="POST">
+            <h2>Create Your Account</h2>
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ token }}"
+            >
+
+            <label>Name</label>
+            <input
+                name="name"
+                maxlength="80"
+                required
+                autocomplete="name"
+                placeholder="Enter your name"
+            >
+
+            <label>Email</label>
+            <input
+                type="email"
+                name="email"
+                maxlength="254"
+                required
+                autocomplete="email"
+                placeholder="Enter your email"
+            >
+
+            <label>Password</label>
+            <input
+                type="password"
+                name="password"
+                minlength="8"
+                maxlength="128"
+                required
+                autocomplete="new-password"
+                placeholder="At least 8 characters"
+            >
+
+            <button type="submit">Register</button>
+
+            <p>
+                Already registered?
+                <a href="{{ url_for('user_login') }}">Login</a>
+            </p>
+
+            <p><a href="/">Back to Home</a></p>
+        </form>
+    </body>
+    </html>
+    """, token=token)
+
+
+# ==========================================
+# 5. USER LOGIN
+# ==========================================
+
+@app.route("/login", methods=["GET", "POST"])
+def user_login():
+
+    if current_user():
+        return redirect(url_for("user_dashboard"))
+
+    if request.method == "POST":
+
+        if not verify_csrf(request.form.get("csrf_token", "")):
+            return "Invalid request. Refresh and try again.", 400
+
+        email = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "")
+
+        connection = get_db()
+
+        user = connection.execute("""
+            SELECT *
+            FROM users
+            WHERE email = ?
+        """, (email,)).fetchone()
+
+        connection.close()
+
+        if not user or not check_password_hash(
+            user["password_hash"],
+            password
+        ):
+            return render_template_string("""
+                <h3>Invalid email or password.</h3>
+                <a href="{{ url_for('user_login') }}">Try again</a>
+            """), 401
+
+        session.clear()
+        session["user_id"] = user["id"]
+        session.permanent = True
+        csrf_token()
+
+        return redirect(url_for("user_dashboard"))
+
+    token = csrf_token()
+
+    return render_template_string("""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>CyberSaathi Login</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <style>
+            * { box-sizing: border-box; }
+
+            body {
+                background: #081426;
+                color: white;
+                font-family: Arial;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                margin: 0;
+                padding: 20px;
+            }
+
+            form {
+                background: #172a43;
+                padding: 30px;
+                border-radius: 12px;
+                width: 100%;
+                max-width: 420px;
+                border: 1px solid #38bdf8;
+            }
+
+            h2 { color: #67e8f9; }
+
+            input {
+                width: 100%;
+                padding: 13px;
+                margin: 9px 0 17px;
+                border-radius: 6px;
+                border: 0;
+            }
+
+            button {
+                width: 100%;
+                padding: 13px;
+                background: #0284c7;
+                color: white;
+                border: 0;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: bold;
+            }
+
+            a { color: #67e8f9; }
+        </style>
+    </head>
+
+    <body>
+        <form method="POST">
+            <h2>CyberSaathi Login</h2>
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ token }}"
+            >
+
+            <label>Email</label>
+            <input
+                type="email"
+                name="email"
+                required
+                autocomplete="email"
+                placeholder="Enter your email"
+            >
+
+            <label>Password</label>
+            <input
+                type="password"
+                name="password"
+                required
+                autocomplete="current-password"
+                placeholder="Enter your password"
+            >
+
+            <button type="submit">Login</button>
+
+            <p>
+                New user?
+                <a href="{{ url_for('register') }}">Create account</a>
+            </p>
+
+            <p><a href="/">Back to Home</a></p>
+        </form>
+    </body>
+    </html>
+    """, token=token)
+
+
+# ==========================================
+# 6. USER DASHBOARD
+# ==========================================
+
+@app.route("/dashboard")
+def user_dashboard():
+
+    user = current_user()
+
+    if user is None:
+        return redirect(url_for("user_login"))
+
+    connection = get_db()
+
+    complaints = connection.execute("""
+        SELECT
+            reference,
+            complaint_type,
+            incident_date,
+            created_at,
+            status
+        FROM complaints
+        WHERE user_id = ?
+        ORDER BY id DESC
+    """, (user["id"],)).fetchall()
+
+    connection.close()
+
+    return render_template_string("""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>My CyberSaathi Dashboard</title>
+
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1">
+
+        <style>
+            * { box-sizing: border-box; }
+
+            body {
+                background: #081426;
+                color: white;
+                font-family: Arial;
+                margin: 0;
+                padding: 22px;
+            }
+
+            .panel {
+                background: #172a43;
+                padding: 24px;
+                border-radius: 12px;
+                margin: 15px auto;
+                max-width: 850px;
+                border: 1px solid #294765;
+                overflow-wrap: anywhere;
+            }
+
+            h1, h2 { color: #67e8f9; }
+
+            .btn {
+                display: inline-block;
+                background: #0284c7;
+                color: white;
+                padding: 11px 16px;
+                text-decoration: none;
+                border-radius: 6px;
+                margin: 5px 5px 5px 0;
+            }
+
+            .complaint {
+                background: #0b3854;
+                padding: 16px;
+                margin: 12px 0;
+                border-radius: 8px;
+            }
+
+            .muted { color: #cbd5e1; }
+
+            .empty {
+                color: #fbbf24;
+                padding: 15px;
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <div class="panel">
+
+            <h1>Welcome, {{ user["name"] }}</h1>
+
+            <p class="muted">{{ user["email"] }}</p>
+
+            <a class="btn" href="/">Home</a>
+
+            <a class="btn" href="#history">My Complaints</a>
+
+            <a class="btn" href="{{ url_for('user_logout') }}">
+                Logout
+            </a>
+
+            <h2 id="history">My Complaint History</h2>
+
+            {% if complaints %}
+
+                {% for c in complaints %}
+
+                    <div class="complaint">
+
+                        <p>
+                            <b>Reference:</b>
+                            {{ c["reference"] }}
+                        </p>
+
+                        <p>
+                            <b>Type:</b>
+                            {{ c["complaint_type"] }}
+                        </p>
+
+                        <p>
+                            <b>Incident Date:</b>
+                            {{ c["incident_date"] or "Not provided" }}
+                        </p>
+
+                        <p>
+                            <b>Submitted:</b>
+                            {{ c["created_at"] }}
+                        </p>
+
+                        <p>
+                            <b>Status:</b>
+                            {{ c["status"] }}
+                        </p>
+
+                        <a
+                            class="btn"
+                            href="{{ url_for(
+                                'track_complaint',
+                                reference=c['reference']
+                            ) }}"
+                        >
+                            Track Complaint
+                        </a>
+
+                    </div>
+
+                {% endfor %}
+
+            {% else %}
+
+                <p class="empty">
+                    No complaints have been submitted through this account yet.
+                </p>
+
+                <a class="btn" href="/#complaint">
+                    Submit a Complaint
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </body>
+    </html>
+    """, user=user, complaints=complaints)
+
+
+# ==========================================
+# 7. USER LOGOUT
+# ==========================================
+
+@app.route("/logout")
+def user_logout():
+    session.clear()
+    return redirect(url_for("home"))
+
+
+# ==========================================
+# 8. PHISHING URL SCANNER
 # ==========================================
 
 TRUSTED_DOMAINS = [
@@ -175,6 +751,7 @@ TRUSTED_DOMAINS = [
 
 
 def scan_url(url):
+
     url = url.strip()
 
     if not url or any(char.isspace() for char in url):
@@ -213,10 +790,7 @@ def scan_url(url):
             is_ip = False
 
         if not is_ip:
-            try:
-                hostname = hostname.encode("idna").decode("ascii")
-            except UnicodeError:
-                raise ValueError("Invalid domain")
+            hostname = hostname.encode("idna").decode("ascii")
 
             if (
                 "." not in hostname
@@ -280,6 +854,7 @@ def scan_url(url):
 
 @app.route("/api/phishing-check", methods=["POST"])
 def phishing_check():
+
     data = request.get_json(silent=True) or {}
     url = data.get("url", "")
 
@@ -292,11 +867,12 @@ def phishing_check():
 
 
 # ==========================================
-# 5. SCAM MESSAGE DETECTOR
+# 9. SCAM MESSAGE DETECTOR
 # ==========================================
 
 @app.route("/api/scam-check", methods=["POST"])
 def scam_check():
+
     data = request.get_json(silent=True) or {}
     message = data.get("message", "")
 
@@ -335,7 +911,9 @@ def scam_check():
     return jsonify({
         "warning_signs": found,
         "risk_level": (
-            "Needs Attention" if found else "No Common Keywords Found"
+            "Needs Attention"
+            if found else
+            "No Common Keywords Found"
         ),
         "message": (
             "This message contains common scam warning signs. "
@@ -348,11 +926,12 @@ def scam_check():
 
 
 # ==========================================
-# 6. DAILY CYBER TIPS
+# 10. DAILY CYBER TIPS
 # ==========================================
 
 @app.route("/api/tips")
 def tips():
+
     return jsonify({
         "tips": [
             "Never share your OTP, PIN or password.",
@@ -370,11 +949,12 @@ def tips():
 
 
 # ==========================================
-# 7. CYBERSAATHI ASSISTANT
+# 11. CYBERSAATHI ASSISTANT
 # ==========================================
 
 @app.route("/api/assistant", methods=["POST"])
 def assistant():
+
     data = request.get_json(silent=True) or {}
     question = data.get("question", "")
 
@@ -447,11 +1027,12 @@ def assistant():
 
 
 # ==========================================
-# 8. SUBMIT COMPLAINT
+# 12. SUBMIT COMPLAINT
 # ==========================================
 
 @app.route("/api/complaints", methods=["POST"])
 def submit_complaint():
+
     data = request.get_json(silent=True) or {}
 
     complaint_type = data.get("type", "")
@@ -499,6 +1080,10 @@ def submit_complaint():
 
     reference = "CS-" + uuid.uuid4().hex[:8].upper()
 
+    # Associate the complaint with the logged-in account, if any.
+    user = current_user()
+    user_id = user["id"] if user else None
+
     connection = get_db()
 
     try:
@@ -509,16 +1094,18 @@ def submit_complaint():
                 description,
                 incident_date,
                 created_at,
-                status
+                status,
+                user_id
             )
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (
             reference,
             complaint_type,
             description,
             incident_date,
             datetime.now().isoformat(timespec="seconds"),
-            "Pending"
+            "Pending",
+            user_id
         ))
 
         connection.commit()
@@ -543,11 +1130,12 @@ def submit_complaint():
 
 
 # ==========================================
-# 9. TRACK COMPLAINT
+# 13. TRACK COMPLAINT
 # ==========================================
 
 @app.route("/api/complaints/<reference>")
 def track_complaint(reference):
+
     connection = get_db()
 
     complaint = connection.execute("""
@@ -572,7 +1160,7 @@ def track_complaint(reference):
 
 
 # ==========================================
-# 10. ADMIN LOGIN
+# 14. ADMIN LOGIN
 # ==========================================
 
 @app.route("/admin/login", methods=["GET", "POST"])
@@ -589,6 +1177,7 @@ def admin_login():
         return redirect(url_for("admin"))
 
     if request.method == "POST":
+
         password = request.form.get("password", "")
         token = request.form.get("csrf_token", "")
 
@@ -598,6 +1187,7 @@ def admin_login():
         if hmac.compare_digest(password, ADMIN_PASSWORD):
             session.clear()
             session["admin_logged_in"] = True
+            session.permanent = True
             csrf_token()
 
             return redirect(url_for("admin"))
@@ -689,7 +1279,7 @@ def admin_login():
 
 
 # ==========================================
-# 11. ADMIN DASHBOARD
+# 15. ADMIN DASHBOARD
 # ==========================================
 
 @app.route("/admin")
@@ -726,6 +1316,7 @@ def admin():
                 OR description LIKE ?
             )
         """
+
         keyword = "%" + search + "%"
         params.extend([keyword, keyword, keyword])
 
@@ -736,7 +1327,8 @@ def admin():
     query += " ORDER BY id DESC"
 
     complaints = connection.execute(
-        query, params
+        query,
+        params
     ).fetchall()
 
     connection.close()
@@ -835,11 +1427,6 @@ def admin():
                 margin-top: 15px;
             }
 
-            .status-form select {
-                background: #fff;
-                color: #111;
-            }
-
             .logout { background: #dc2626; }
 
             .empty { color: #fbbf24; }
@@ -859,13 +1446,11 @@ def admin():
             <h2>Welcome, Administrator</h2>
             <p>Manage and monitor submitted complaints.</p>
 
-            <a class="btn"
-               href="{{ url_for('admin_export') }}">
+            <a class="btn" href="{{ url_for('admin_export') }}">
                 Export CSV
             </a>
 
-            <a class="btn logout"
-               href="{{ url_for('admin_logout') }}">
+            <a class="btn logout" href="{{ url_for('admin_logout') }}">
                 Logout
             </a>
         </div>
@@ -965,6 +1550,11 @@ def admin():
                     </p>
 
                     <p>
+                        <b>Account User ID:</b>
+                        {{ c.user_id or 'Guest submission' }}
+                    </p>
+
+                    <p>
                         <b>Current Status:</b>
                         {{ c.status }}
                     </p>
@@ -1021,9 +1611,7 @@ def admin():
         {% else %}
 
             <div class="complaint">
-                <p class="empty">
-                    No complaints found.
-                </p>
+                <p class="empty">No complaints found.</p>
             </div>
 
         {% endif %}
@@ -1042,7 +1630,7 @@ def admin():
 
 
 # ==========================================
-# 12. UPDATE COMPLAINT STATUS
+# 16. UPDATE COMPLAINT STATUS
 # ==========================================
 
 @app.route(
@@ -1088,8 +1676,17 @@ def update_complaint(complaint_id):
 
 
 # ==========================================
-# 13. EXPORT COMPLAINT REPORT
+# 17. EXPORT COMPLAINT REPORT
 # ==========================================
+
+def safe_csv_cell(value):
+    value = "" if value is None else str(value)
+
+    if value.lstrip().startswith(("=", "+", "-", "@")):
+        return "'" + value
+
+    return value
+
 
 @app.route("/admin/export")
 def admin_export():
@@ -1131,14 +1728,14 @@ def admin_export():
 
     for c in complaints:
         writer.writerow([
-            c["id"],
-            c["reference"],
-            c["complaint_type"],
-            c["description"],
-            c["incident_date"],
-            c["created_at"],
-            c["status"],
-            c["admin_note"]
+            safe_csv_cell(c["id"]),
+            safe_csv_cell(c["reference"]),
+            safe_csv_cell(c["complaint_type"]),
+            safe_csv_cell(c["description"]),
+            safe_csv_cell(c["incident_date"]),
+            safe_csv_cell(c["created_at"]),
+            safe_csv_cell(c["status"]),
+            safe_csv_cell(c["admin_note"])
         ])
 
     response = make_response("\ufeff" + output.getvalue())
@@ -1155,7 +1752,7 @@ def admin_export():
 
 
 # ==========================================
-# 14. ADMIN LOGOUT
+# 18. ADMIN LOGOUT
 # ==========================================
 
 @app.route("/admin/logout")
@@ -1165,7 +1762,7 @@ def admin_logout():
 
 
 # ==========================================
-# 15. CREATE DATABASE & START APPLICATION
+# 19. CREATE DATABASE & START APPLICATION
 # ==========================================
 
 create_database()
@@ -1177,3 +1774,4 @@ if __name__ == "__main__":
         port=int(os.environ.get("PORT", 5000)),
         debug=False
     )
+   
