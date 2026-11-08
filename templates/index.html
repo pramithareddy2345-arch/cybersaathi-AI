@@ -8,310 +8,171 @@
 <title>CyberSaathi AI | Cyber Safety Platform</title>
 
 <style>
-:root {
-    --bg: #081426;
-    --panel: #122640;
-    --panel-light: #193552;
-    --blue: #0284c7;
-    --cyan: #67e8f9;
-    --text: #f1f5f9;
-    --muted: #b7c8da;
-    --border: #294765;
+*{box-sizing:border-box}
+:root{
+    --bg:#081426;
+    --panel:#122640;
+    --panel2:#183451;
+    --blue:#168bd2;
+    --cyan:#55c8ff;
+    --white:#f1f5f9;
+    --muted:#b8c9da;
 }
-
-* {
-    box-sizing: border-box;
-    scroll-behavior: smooth;
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:var(--bg);
+    color:var(--white);
+    line-height:1.6;
 }
-
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.6;
+a{color:var(--cyan);text-decoration:none}
+button{cursor:pointer}
+header{
+    background:#07152b;
+    padding:16px 5%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+    flex-wrap:wrap;
+    border-bottom:1px solid #24415e;
 }
-
-header {
-    background: #07152b;
-    padding: 17px 7%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
-    border-bottom: 1px solid var(--border);
+.logo{font-size:23px;font-weight:bold;color:white}
+.logo span{color:var(--cyan)}
+nav{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:10px;
+    flex-wrap:wrap;
 }
-
-.logo {
-    font-size: 25px;
-    font-weight: bold;
-    color: white;
+nav a{
+    color:#e4f1ff;
+    padding:8px 11px;
+    border-radius:7px;
 }
-
-.logo span {
-    color: var(--cyan);
+nav a:hover{background:#183451}
+.nav-account{
+    background:#168bd2;
+    border-radius:7px;
 }
-
-nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
+.nav-account:hover{background:#0875b9}
+.hero{
+    padding:75px 7%;
+    text-align:center;
+    background:linear-gradient(135deg,#0b2140,#123b60);
 }
-
-nav a {
-    text-decoration: none;
-    color: white;
-    font-size: 14px;
-    font-weight: bold;
+.hero h1{font-size:clamp(32px,5vw,52px);margin:0 0 12px}
+.hero h1 span{color:var(--cyan)}
+.hero p{max-width:750px;margin:12px auto;color:#d2e4f5}
+.primary-btn,.secondary-btn{
+    display:inline-block;
+    padding:12px 20px;
+    border-radius:8px;
+    margin:8px 5px;
+    border:0;
+    font-weight:bold;
 }
-
-nav a:hover {
-    color: var(--cyan);
+.primary-btn{background:var(--blue);color:white}
+.secondary-btn{background:#254665;color:white}
+section{padding:45px 6%;scroll-margin-top:20px}
+.section-title{text-align:center;margin-bottom:28px}
+.section-title h2{font-size:30px;margin-bottom:5px}
+.section-title p{color:var(--muted)}
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+    gap:18px;
 }
-
-nav .account-link {
-    color: var(--cyan);
+.card{
+    background:var(--panel);
+    border:1px solid #29435e;
+    border-radius:13px;
+    padding:21px;
 }
-
-.hero {
-    min-height: 390px;
-    padding: 85px 20px;
-    text-align: center;
-    background:
-    radial-gradient(circle at top right, #075985 0, transparent 40%),
-    linear-gradient(120deg, #07152b, #123c60);
+.card h3{color:var(--cyan);margin-top:0}
+.card p{color:var(--muted)}
+.tool-card input,.tool-card textarea,.tool-card select,
+.form-card input,.form-card textarea,.form-card select{
+    width:100%;
+    padding:12px;
+    border:1px solid #35516e;
+    border-radius:8px;
+    background:#091a30;
+    color:white;
+    margin:7px 0 12px;
+    font:inherit;
 }
-
-.hero h1 {
-    font-size: clamp(32px, 5vw, 48px);
-    color: var(--cyan);
-    margin: 0 0 15px;
+textarea{min-height:110px;resize:vertical}
+.action-btn{
+    border:0;
+    border-radius:8px;
+    padding:11px 16px;
+    background:var(--blue);
+    color:white;
+    font-weight:bold;
 }
-
-.hero p {
-    max-width: 650px;
-    margin: 0 auto 25px;
-    color: white;
-    font-size: 17px;
+.action-btn:hover{background:#0875b9}
+.result{
+    display:none;
+    margin-top:14px;
+    padding:13px;
+    background:#091a30;
+    border:1px solid #35516e;
+    border-radius:8px;
+    overflow-wrap:anywhere;
 }
-
-.btn {
-    display: inline-block;
-    background: var(--blue);
-    color: white;
-    text-decoration: none;
-    border: 0;
-    padding: 12px 21px;
-    border-radius: 7px;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 14px;
+.tip-box{
+    background:#123b60;
+    padding:20px;
+    border-radius:12px;
+    text-align:center;
 }
-
-.btn:hover {
-    background: #0369a1;
+.tip-box p{font-size:18px}
+.assistant-chat{
+    height:220px;
+    overflow-y:auto;
+    background:#091a30;
+    border:1px solid #35516e;
+    border-radius:9px;
+    padding:12px;
+    margin-bottom:12px;
 }
-
-.btn-secondary {
-    background: #193b59;
-    border: 1px solid #4a7597;
+.chat-message{
+    padding:9px 12px;
+    border-radius:9px;
+    margin:7px 0;
+    max-width:90%;
+    overflow-wrap:anywhere;
 }
-
-.container {
-    max-width: 1150px;
-    margin: auto;
-    padding: 55px 22px;
+.bot{background:#183451}
+.user{background:#075c91;margin-left:auto}
+.inline-fields{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
 }
-
-.section-title {
-    text-align: center;
-    color: var(--cyan);
-    font-size: 29px;
-    margin: 0 0 10px;
+.info-banner{
+    background:#123b60;
+    padding:22px;
+    border-radius:12px;
+    text-align:center;
 }
-
-.section-subtitle {
-    text-align: center;
-    color: var(--muted);
-    margin: 0 auto 30px;
-    max-width: 650px;
+footer{
+    padding:28px 6%;
+    text-align:center;
+    background:#07152b;
+    color:var(--muted);
+    border-top:1px solid #24415e;
 }
-
-.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
-    gap: 20px;
-}
-
-.card {
-    background: var(--panel);
-    padding: 23px;
-    border: 1px solid var(--border);
-    border-radius: 13px;
-    box-shadow: 0 5px 18px #0003;
-}
-
-.card:hover {
-    border-color: #38bdf8;
-}
-
-.card h3 {
-    color: var(--cyan);
-    margin-top: 0;
-}
-
-.card p {
-    color: var(--muted);
-}
-
-.card-icon {
-    font-size: 30px;
-    margin-bottom: 8px;
-}
-
-input, select, textarea {
-    width: 100%;
-    padding: 13px;
-    margin: 8px 0 16px;
-    border: 1px solid #64748b;
-    border-radius: 7px;
-    font: inherit;
-    background: #fff;
-    color: #14243a;
-}
-
-input:focus, select:focus, textarea:focus {
-    outline: 2px solid #38bdf8;
-}
-
-textarea {
-    min-height: 115px;
-    resize: vertical;
-}
-
-label {
-    font-weight: bold;
-    color: white;
-    font-size: 14px;
-}
-
-button {
-    font-family: inherit;
-}
-
-.result {
-    display: none;
-    margin-top: 15px;
-    padding: 15px;
-    border-radius: 8px;
-    background: #0b3854;
-    border: 1px solid #38bdf8;
-    color: white;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-}
-
-.result.show {
-    display: block;
-}
-
-.result.error {
-    background: #49242a;
-    border-color: #f87171;
-}
-
-.result.success {
-    background: #123e35;
-    border-color: #34d399;
-}
-
-.form-card {
-    max-width: 720px;
-    margin: auto;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    padding: 27px;
-    border-radius: 13px;
-}
-
-.notice {
-    max-width: 720px;
-    margin: 20px auto 0;
-    padding: 17px;
-    background: #493719;
-    border-left: 4px solid #fbbf24;
-    border-radius: 5px;
-    color: #fff4d6;
-}
-
-.stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 15px;
-    margin-top: -35px;
-    position: relative;
-    padding: 0 20px;
-}
-
-.stat-card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    text-align: center;
-    padding: 20px;
-}
-
-.stat-card strong {
-    display: block;
-    color: var(--cyan);
-    font-size: 22px;
-}
-
-.stat-card span {
-    color: var(--muted);
-    font-size: 13px;
-}
-
-.resource-link {
-    color: var(--cyan);
-    font-weight: bold;
-}
-
-footer {
-    background: #07152b;
-    padding: 28px 15px;
-    text-align: center;
-    border-top: 1px solid var(--border);
-}
-
-footer p {
-    color: var(--muted);
-    margin: 5px;
-}
-
-footer a {
-    color: var(--cyan);
-}
-
-@media(max-width: 650px) {
-    header {
-        justify-content: center;
-        text-align: center;
-    }
-
-    nav {
-        justify-content: center;
-        gap: 12px;
-    }
-
-    .hero {
-        padding: 65px 18px;
-    }
-
-    .container {
-        padding: 40px 16px;
-    }
+footer a{margin:0 8px}
+.notice{color:#ffd98a;font-size:13px}
+@media(max-width:700px){
+    header{align-items:flex-start}
+    nav{justify-content:flex-start}
+    .hero{padding:55px 5%}
+    section{padding:35px 5%}
+    .inline-fields{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -319,102 +180,505 @@ footer a {
 <body>
 
 <header>
-    <div class="logo">🛡️ Cyber<span>Saathi AI</span></div>
+    <a class="logo" href="/">Cyber<span>Saathi</span> AI</a>
 
     <nav>
         <a href="#home">Home</a>
         <a href="#awareness">Awareness</a>
         <a href="#tools">AI Tools</a>
-        <a href="#complaint">Report</a>
+        <a href="#report">Report</a>
         <a href="#track">Track</a>
         <a href="#resources">Resources</a>
-        <a href="/register" class="account-link">Register</a>
-        <a href="/login" class="account-link">Login</a>
-        <a href="/dashboard" class="account-link">Dashboard</a>
-        <a href="/logout" class="account-link">Logout</a>
+
+        {% if session.get('user_id') %}
+            <a class="nav-account" href="{{ url_for('dashboard') }}">Dashboard</a>
+            <a class="nav-account" href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+            <a class="nav-account" href="{{ url_for('register') }}">Register</a>
+            <a class="nav-account" href="{{ url_for('login') }}">Login</a>
+        {% endif %}
     </nav>
 </header>
 
-<section class="hero" id="home">
-    <h1>Your Digital Safety Matters</h1>
-    <p>
-        Stay alert. Stay informed. Stay protected.
-        CyberSaathi AI helps you understand online risks
-        and make safer digital decisions.
-    </p>
-    <a href="#tools" class="btn">Explore Safety Tools</a>
-    <a href="#complaint" class="btn btn-secondary">Report an Incident</a>
-</section>
 
-<div class="stats">
-    <div class="stat-card">
-        <strong>24/7</strong>
-        <span>Cyber Awareness</span>
-    </div>
-    <div class="stat-card">
-        <strong>4+</strong>
-        <span>Safety Tools</span>
-    </div>
-    <div class="stat-card">
-        <strong>Secure</strong>
-        <span>Awareness First</span>
-    </div>
+<!-- HOME -->
+<div class="hero" id="home">
+    <h1>Your Digital Safety Partner — <span>CyberSaathi AI</span></h1>
+    <p>
+        Learn cyber safety, identify suspicious messages,
+        check potentially unsafe links and understand how to report cybercrime.
+    </p>
+    <a href="#awareness" class="primary-btn">Explore Cyber Safety</a>
+    <a href="#report" class="secondary-btn">Report an Incident</a>
 </div>
 
-<section class="container" id="awareness">
-    <h2 class="section-title">Cyber Awareness Centre</h2>
-    <p class="section-subtitle">
-        Understand common online threats and learn how to protect yourself.
-    </p>
+
+<!-- AWARENESS -->
+<section id="awareness">
+    <div class="section-title">
+        <h2>Cyber Awareness</h2>
+        <p>Understand common online threats and learn how to protect yourself.</p>
+    </div>
 
     <div class="grid">
         <div class="card">
-            <div class="card-icon">🎣</div>
             <h3>Phishing Attacks</h3>
-            <p>Recognize suspicious emails, fake websites and misleading links.</p>
+            <p>Learn how fake emails, messages and websites try to steal personal information.</p>
         </div>
-
         <div class="card">
-            <div class="card-icon">💳</div>
-            <h3>Online Financial Fraud</h3>
-            <p>Learn how to identify payment scams and suspicious money requests.</p>
+            <h3>Financial Fraud</h3>
+            <p>Recognise suspicious payment requests, UPI scams and fake banking messages.</p>
         </div>
-
         <div class="card">
-            <div class="card-icon">🪪</div>
-            <h3>Identity Protection</h3>
-            <p>Protect personal information and never share confidential details.</p>
+            <h3>Identity Theft</h3>
+            <p>Protect personal information and avoid sharing sensitive documents with unknown people.</p>
         </div>
-
         <div class="card">
-            <div class="card-icon">📱</div>
             <h3>Social Media Safety</h3>
-            <p>Use privacy settings and be careful about what you share online.</p>
+            <p>Use privacy settings and be careful when communicating with unknown accounts.</p>
         </div>
-
         <div class="card">
-            <div class="card-icon">🔐</div>
             <h3>Password Security</h3>
-            <p>Use unique passwords and enable two-factor authentication.</p>
+            <p>Create unique passwords and enable two-factor authentication.</p>
         </div>
-
         <div class="card">
-            <div class="card-icon">🌐</div>
             <h3>Safe Browsing</h3>
-            <p>Check website addresses and avoid unknown downloads.</p>
+            <p>Check website addresses and avoid suspicious downloads and unexpected links.</p>
         </div>
     </div>
 </section>
 
-<section class="container" id="tools">
-    <h2 class="section-title">CyberSaathi Safety Tools</h2>
-    <p class="section-subtitle">
-        Explore simple tools that help identify common online warning signs.
-    </p>
+
+<!-- AI TOOLS -->
+<section id="tools">
+    <div class="section-title">
+        <h2>CyberSaathi AI Tools</h2>
+        <p>Use these basic educational tools to identify common warning signs.</p>
+    </div>
 
     <div class="grid">
 
+        <div class="card tool-card">
+            <h3>Phishing URL Checker</h3>
+            <p>Check a website address for common suspicious patterns.</p>
+            <input type="text" id="urlInput" placeholder="Enter website URL">
+            <button class="action-btn" onclick="checkURL()">Check URL</button>
+            <div class="result" id="urlResult"></div>
+        </div>
+
+        <div class="card tool-card">
+            <h3>Scam Message Checker</h3>
+            <p>Check a message for common scam-related warning phrases.</p>
+            <textarea id="scamInput" placeholder="Paste a suspicious message here"></textarea>
+            <button class="action-btn" onclick="checkScam()">Check Message</button>
+            <div class="result" id="scamResult"></div>
+        </div>
+
         <div class="card">
+            <h3>Daily Cyber Tip</h3>
+            <p>Get a simple cyber safety tip.</p>
+            <div class="tip-box">
+                <p id="dailyTip">Loading your cyber safety tip...</p>
+                <button class="action-btn" onclick="loadTip()">New Tip</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>CyberSaathi Assistant</h3>
+            <p>Ask a basic cyber safety question.</p>
+            <div class="assistant-chat" id="chatBox">
+                <div class="chat-message bot">
+                    Hello! I am CyberSaathi Assistant. How can I help you with cyber safety?
+                </div>
+            </div>
+            <input type="text" id="chatInput" placeholder="Type your question..."
+                style="width:100%;padding:12px;background:#091a30;color:white;border:1px solid #35516e;border-radius:8px">
+            <button class="action-btn" onclick="sendMessage()">Send</button>
+        </div>
+
+    </div>
+    <p class="notice">
+        Note: These tools use basic rules and keywords. They cannot guarantee that a website
+        or message is safe or fraudulent.
+    </p>
+</section>
+
+
+<!-- REPORT -->
+<section id="report">
+    <div class="section-title">
+        <h2>Report a Cyber Incident</h2>
+        <p>Submit an incident report through CyberSaathi.</p>
+    </div>
+
+    <div class="card form-card" style="max-width:750px;margin:auto">
+        <form id="complaintForm">
+            <label>Complaint Type</label>
+            <select name="complaint_type" required>
+                <option value="">Select complaint type</option>
+                <option>Online Financial Fraud</option>
+                <option>Phishing</option>
+                <option>Social Media Fraud</option>
+                <option>Identity Theft</option>
+                <option>Cyber Bullying</option>
+                <option>Fake Website</option>
+                <option>Other</option>
+            </select>
+
+            <label>Incident Date</label>
+            <input type="date" name="incident_date">
+
+            <label>Describe the Incident</label>
+            <textarea name="description" minlength="10"
+                placeholder="Explain what happened. Avoid entering passwords, OTPs or other secret information."
+                required></textarea>
+
+            <button class="action-btn" type="submit">Submit Complaint</button>
+        </form>
+
+        <div class="result" id="complaintResult"></div>
+    </div>
+</section>
+
+
+<!-- TRACK -->
+<section id="track">
+    <div class="section-title">
+        <h2>Track Your Complaint</h2>
+        <p>Enter the reference number you received after submitting a complaint.</p>
+    </div>
+
+    <div class="card tool-card" style="max-width:650px;margin:auto">
+        <input id="referenceInput" placeholder="Example: CS-1234ABCD">
+        <button class="action-btn" onclick="trackComplaint()">Track Complaint</button>
+        <div class="result" id="trackResult"></div>
+    </div>
+</section>
+
+
+<!-- RESOURCES -->
+<section id="resources">
+    <div class="section-title">
+        <h2>Cyber Crime Help and Resources</h2>
+        <p>Use official channels for reporting cybercrime in India.</p>
+    </div>
+
+    <div class="info-banner">
+        <h2>National Cyber Crime Reporting Portal</h2>
+        <p>For official cybercrime reporting, use the Government of India's portal.</p>
+        <a class="primary-btn" href="https://cybercrime.gov.in/"
+           target="_blank" rel="noopener noreferrer">
+            Visit Official Cyber Crime Portal
+        </a>
+        <h2>1930</h2>
+        <p>Cyber financial fraud helpline in India. Contact promptly if you suspect financial fraud.</p>
+    </div>
+</section>
+
+
+<footer>
+    <p>© 2026 CyberSaathi AI | Cyber Awareness and Safety Platform</p>
+    <p>
+        <a href="/">Home</a>
+        <a href="#awareness">Awareness</a>
+        <a href="#tools">AI Tools</a>
+        <a href="{{ url_for('admin_login') }}">Admin Login</a>
+    </p>
+    <small>CyberSaathi is an educational platform and is not a substitute for official cybercrime reporting.</small>
+</footer>
+
+
+<script>
+// --------------------------------------------------
+// COMMON RESULT DISPLAY
+// --------------------------------------------------
+
+function showResult(elementId, content) {
+    const element = document.getElementById(elementId);
+    element.style.display = "block";
+    element.innerHTML = content;
+}
+
+function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, function(character) {
+        return {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#039;"
+        }[character];
+    });
+}
+
+
+// --------------------------------------------------
+// PHISHING URL CHECKER
+// --------------------------------------------------
+
+async function checkURL() {
+    const url = document.getElementById("urlInput").value.trim();
+
+    if (!url) {
+        showResult("urlResult", "Please enter a website URL.");
+        return;
+    }
+
+    showResult("urlResult", "Checking URL...");
+
+    try {
+        const response = await fetch("/api/phishing-check", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({url: url})
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Unable to check URL.");
+        }
+
+        let html = "<h4>" + escapeHTML(data.result) + "</h4>";
+        html += "<p><b>Risk:</b> " + escapeHTML(data.risk) + "</p>";
+        html += "<p>" + escapeHTML(data.message) + "</p>";
+
+        if (data.reasons && data.reasons.length) {
+            html += "<ul>";
+            data.reasons.forEach(reason => {
+                html += "<li>" + escapeHTML(reason) + "</li>";
+            });
+            html += "</ul>";
+        }
+
+        showResult("urlResult", html);
+
+    } catch (error) {
+        showResult("urlResult", escapeHTML(error.message));
+    }
+}
+
+
+// --------------------------------------------------
+// SCAM MESSAGE CHECKER
+// --------------------------------------------------
+
+async function checkScam() {
+    const message = document.getElementById("scamInput").value.trim();
+
+    if (!message) {
+        showResult("scamResult", "Please enter a message.");
+        return;
+    }
+
+    showResult("scamResult", "Checking message...");
+
+    try {
+        const response = await fetch("/api/scam-check", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({message: message})
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Unable to check message.");
+        }
+
+        let html = "<h4>" + escapeHTML(data.result) + "</h4>";
+        html += "<p><b>Risk:</b> " + escapeHTML(data.risk) + "</p>";
+        html += "<p>" + escapeHTML(data.message) + "</p>";
+
+        if (data.indicators && data.indicators.length) {
+            html += "<p><b>Warning phrases:</b></p><ul>";
+            data.indicators.forEach(item => {
+                html += "<li>" + escapeHTML(item) + "</li>";
+            });
+            html += "</ul>";
+        }
+
+        showResult("scamResult", html);
+
+    } catch (error) {
+        showResult("scamResult", escapeHTML(error.message));
+    }
+}
+
+
+// --------------------------------------------------
+// DAILY TIPS
+// --------------------------------------------------
+
+async function loadTip() {
+    const tip = document.getElementById("dailyTip");
+    tip.textContent = "Loading...";
+
+    try {
+        const response = await fetch("/api/tips");
+        const data = await response.json();
+
+        if (!response.ok) throw new Error("Unable to load tip.");
+
+        tip.textContent = data.tip;
+
+    } catch (error) {
+        tip.textContent = "Never share your OTP, PIN or password with anyone.";
+    }
+}
+
+
+// --------------------------------------------------
+// CYBERSAATHI ASSISTANT
+// --------------------------------------------------
+
+function addChatMessage(message, type) {
+    const box = document.getElementById("chatBox");
+    const item = document.createElement("div");
+
+    item.className = "chat-message " + type;
+    item.textContent = message;
+
+    box.appendChild(item);
+    box.scrollTop = box.scrollHeight;
+}
+
+async function sendMessage() {
+    const input = document.getElementById("chatInput");
+    const message = input.value.trim();
+
+    if (!message) return;
+
+    addChatMessage(message, "user");
+    input.value = "";
+
+    try {
+        const response = await fetch("/api/assistant", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({message: message})
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) throw new Error(data.error || "Assistant unavailable.");
+
+        addChatMessage(data.reply, "bot");
+
+    } catch (error) {
+        addChatMessage(error.message, "bot");
+    }
+}
+
+document.getElementById("chatInput").addEventListener("keydown", function(event) {
+    if (event.key === "Enter") sendMessage();
+});
+
+
+// --------------------------------------------------
+// COMPLAINT SUBMISSION
+// --------------------------------------------------
+
+document.getElementById("complaintForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const form = event.target;
+    const formData = new FormData(form);
+
+    const data = {
+        complaint_type: formData.get("complaint_type"),
+        incident_date: formData.get("incident_date"),
+        description: formData.get("description")
+    };
+
+    showResult("complaintResult", "Submitting complaint...");
+
+    try {
+        const response = await fetch("/api/complaints", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || "Complaint submission failed.");
+        }
+
+        showResult(
+            "complaintResult",
+            "<h3>Complaint submitted successfully!</h3>" +
+            "<p>Your reference number is:</p>" +
+            "<h2>" + escapeHTML(result.reference) + "</h2>" +
+            "<p>Save this reference number to track your complaint.</p>"
+        );
+
+        form.reset();
+
+    } catch (error) {
+        showResult("complaintResult", escapeHTML(error.message));
+    }
+});
+
+
+// --------------------------------------------------
+// COMPLAINT TRACKING
+// --------------------------------------------------
+
+async function trackComplaint() {
+    const reference = document.getElementById("referenceInput").value.trim().toUpperCase();
+
+    if (!reference) {
+        showResult("trackResult", "Please enter your complaint reference number.");
+        return;
+    }
+
+    showResult("trackResult", "Searching...");
+
+    try {
+        const response = await fetch(
+            "/api/complaints/" + encodeURIComponent(reference)
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Complaint not found.");
+        }
+
+        let html = "<h3>Complaint Details</h3>";
+        html += "<p><b>Reference:</b> " + escapeHTML(data.reference) + "</p>";
+        html += "<p><b>Type:</b> " + escapeHTML(data.complaint_type) + "</p>";
+        html += "<p><b>Submitted:</b> " + escapeHTML(data.created_at) + "</p>";
+        html += "<p><b>Status:</b> " + escapeHTML(data.status) + "</p>";
+
+        if (data.admin_note) {
+            html += "<p><b>Admin note:</b> " + escapeHTML(data.admin_note) + "</p>";
+        }
+
+        showResult("trackResult", html);
+
+    } catch (error) {
+        showResult("trackResult", escapeHTML(error.message));
+    }
+}
+
+
+// --------------------------------------------------
+// LOAD TIP ON PAGE OPEN
+// --------------------------------------------------
+
+loadTip();
+
+</script>
+</body>
+</html>
+
+
+
+
+        < class="card">
             <div class="card-icon">🔎</div>
             <h3>Phishing URL Checker</h3>
             <p>Check a URL for basic suspicious patterns.</p>
@@ -494,222 +758,3 @@ footer a {
         For financial cyber fraud, call 1930 promptly.
     </div>
 </section>
-
-<section class="container" id="track">
-    <h2 class="section-title">Track Your Complaint</h2>
-    <p class="section-subtitle">
-        Enter the reference ID received after submitting your report.
-    </p>
-
-    <div class="form-card">
-        <label for="referenceInput">Complaint Reference ID</label>
-        <input id="referenceInput" placeholder="Example: CS-XXXXXXXX">
-
-        <button class="btn" onclick="trackComplaint()">Track Complaint</button>
-
-        <div id="trackingResult" class="result"></div>
-    </div>
-</section>
-
-<section class="container" id="resources">
-    <h2 class="section-title">Official Cybercrime Resources</h2>
-
-    <div class="grid">
-        <div class="card">
-            <div class="card-icon">🏛️</div>
-            <h3>Government Cybercrime Portal</h3>
-            <p>Visit India's official cybercrime reporting portal.</p>
-            <a class="btn" href="https://cybercrime.gov.in/"
-               target="_blank" rel="noopener">Visit Portal</a>
-        </div>
-
-        <div class="card">
-            <div class="card-icon">☎️</div>
-            <h3>Cybercrime Helpline</h3>
-            <p>Call 1930 for assistance with financial cyber fraud in India.</p>
-        </div>
-
-        <div class="card">
-            <div class="card-icon">📚</div>
-            <h3>Cyber Safety Education</h3>
-            <p>Learn to recognize digital risks and protect your information.</p>
-        </div>
-    </div>
-</section>
-
-<footer>
-    <div class="logo">🛡️ Cyber<span>Saathi AI</span></div>
-    <p>Your Companion for Cyber Safety and Awareness</p>
-    <p>Think Before You Click. Stay Cyber Safe!</p>
-    <p>© 2026 CyberSaathi AI | Educational Project</p>
-    <p><a href="/admin">Admin Dashboard</a></p>
-</footer>
-
-<script>
-async function requestJSON(url, options = {}) {
-    const response = await fetch(url, options);
-
-    let data;
-    try {
-        data = await response.json();
-    } catch {
-        throw new Error("The server returned an invalid response.");
-    }
-
-    if (!response.ok) {
-        throw new Error(data.error || data.message || "Request failed.");
-    }
-
-    return data;
-}
-
-async function postJSON(url, data) {
-    return requestJSON(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-    });
-}
-
-function showResult(id, message, type = "") {
-    const box = document.getElementById(id);
-    box.textContent = message;
-    box.className = "result show " + type;
-}
-
-async function runAction(id, action) {
-    showResult(id, "Please wait...");
-
-    try {
-        const message = await action();
-        showResult(id, message, "success");
-    } catch (error) {
-        showResult(id, "Error: " + error.message, "error");
-    }
-}
-
-async function checkPhishing() {
-    const url = document.getElementById("urlInput").value.trim();
-
-    if (!url) {
-        showResult("urlResult", "Please enter a website URL.", "error");
-        return;
-    }
-
-    await runAction("urlResult", async () => {
-        const data = await postJSON("/api/phishing-check", {url});
-
-        return (data.message || "Check completed.") +
-            (data.warnings?.length
-                ? "\n\nWarning signs:\n" + data.warnings.join("\n")
-                : "");
-    });
-}
-
-async function checkScam() {
-    const message = document.getElementById("scamInput").value.trim();
-
-    if (!message) {
-        showResult("scamResult", "Please enter a message.", "error");
-        return;
-    }
-
-    await runAction("scamResult", async () => {
-        const data = await postJSON("/api/scam-check", {message});
-
-        return (data.message || "Check completed.") +
-            (data.warning_signs?.length
-                ? "\n\nWarning signs:\n" + data.warning_signs.join("\n")
-                : "");
-    });
-}
-
-async function getTips() {
-    await runAction("tipsResult", async () => {
-        const data = await requestJSON("/api/tips");
-
-        if (!Array.isArray(data.tips)) {
-            throw new Error("Tips are currently unavailable.");
-        }
-
-        return data.tips.map((tip, index) =>
-            (index + 1) + ". " + tip
-        ).join("\n");
-    });
-}
-
-async function askAssistant() {
-    const question = document.getElementById("questionInput").value.trim();
-
-    if (!question) {
-        showResult("assistantResult", "Please enter a question.", "error");
-        return;
-    }
-
-    await runAction("assistantResult", async () => {
-        const data = await postJSON("/api/assistant", {question});
-        return data.answer || "No answer was returned.";
-    });
-}
-
-document.getElementById("complaintForm").addEventListener("submit",
-async function(event) {
-    event.preventDefault();
-
-    const button = document.getElementById("submitButton");
-    button.disabled = true;
-    button.textContent = "Submitting...";
-
-    try {
-        await runAction("complaintResult", async () => {
-            const data = await postJSON("/api/complaints", {
-                type: document.getElementById("complaintType").value,
-                description: document.getElementById("description").value.trim(),
-                date: document.getElementById("incidentDate").value
-            });
-
-            if (data.reference) {
-                document.getElementById("referenceInput").value =
-                    data.reference;
-            }
-
-            return (data.message || "Report submitted successfully.") +
-                "\n\nReference ID: " + (data.reference || "Not provided") +
-                "\n\nSave this reference ID to track your report.";
-        });
-
-        if (document.getElementById("complaintResult").classList.contains("success")) {
-            document.getElementById("complaintForm").reset();
-        }
-    } finally {
-        button.disabled = false;
-        button.textContent = "Submit Report";
-    }
-});
-
-async function trackComplaint() {
-    const reference = document.getElementById("referenceInput")
-        .value.trim();
-
-    if (!reference) {
-        showResult("trackingResult", "Please enter your reference ID.", "error");
-        return;
-    }
-
-    await runAction("trackingResult", async () => {
-        const data = await requestJSON(
-            "/api/complaints/" + encodeURIComponent(reference)
-        );
-
-        return "Complaint Reference: " + (data.reference || reference) +
-            "\nStatus: " + (data.status || "Not available") +
-            (data.message ? "\nMessage: " + data.message : "");
-    });
-}
-</script>
-
-</body>
-</html>
-
