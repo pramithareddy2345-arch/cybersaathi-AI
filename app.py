@@ -10,9 +10,10 @@ from datetime import datetime
 from urllib.parse import urlparse
 
 from flask import (
-    Flask, render_template, request, jsonify,
+    Flask, render_template, render_template_string, request, jsonify,
     session, redirect, url_for, Response, flash
 )
+
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 
