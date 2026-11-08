@@ -1,36 +1,93 @@
 import os
 import re
 import hmac
+import csv
+import io
 import uuid
 import secrets
 import sqlite3
+import ipaddress
 
 from datetime import datetime
 from urllib.parse import urlparse
 from flask import (
     Flask, render_template, request, jsonify,
-    session, redirect, url_for, render_template_string
+    session, redirect, url_for, render_template_string,
+    make_response
 )
 
 app = Flask(__name__)
 
-# SECURITY SETTINGS
+# ==========================================
+# 1. CONFIGURATION & SECURITY
+# ==========================================
+
 app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
+
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
+
+DATABASE = os.environ.get("DATABASE_PATH", "cybersaathi.db")
+
+STATUSES = [
+    "Pending",
+    "Under Review",
+    "Resolved",
+    "Rejected"
+]
+
+COMPLAINT_TYPES = [
+    "Online Financial Fraud",
+    "Phishing",
+    "Social Media Harassment",
+    "Identity Theft",
+    "Other Cybercrime"
+]
 
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
-    SESSION_COOKIE_SECURE=os.environ.get("RENDER") == "true"
+    SESSION_COOKIE_SECURE=os.environ.get("RENDER") == "true",
+    MAX_CONTENT_LENGTH=1024 * 1024
 )
 
-# DATABASE
-DATABASE = os.environ.get("DATABASE_PATH", "cybersaathi.db")
 
+@app.after_request
+def security_headers(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = (
+        "camera=(), microphone=(), geolocation=()"
+    )
+    return response
+
+
+def is_admin():
+    return session.get("admin_logged_in") is True
+
+
+def csrf_token():
+    if "csrf_token" not in session:
+        session["csrf_token"] = secrets.token_urlsafe(32)
+    return session["csrf_token"]
+
+
+def verify_csrf(token):
+    saved = session.get("csrf_token", "")
+    return bool(saved) and hmac.compare_digest(saved, token or "")
+
+
+# ==========================================
+# 2. DATABASE
+# ==========================================
 
 def get_db():
-    connection = sqlite3.connect(DATABASE)
+    connection = sqlite3.connect(
+        DATABASE,
+        timeout=15
+    )
     connection.row_factory = sqlite3.Row
+    connection.execute("PRAGMA foreign_keys = ON")
     return connection
 
 
@@ -44,33 +101,79 @@ def create_database():
         CREATE TABLE IF NOT EXISTS complaints (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             reference TEXT UNIQUE,
-            complaint_type TEXT,
-            description TEXT,
+            complaint_type TEXT NOT NULL,
+            description TEXT NOT NULL,
             incident_date TEXT,
-            created_at TEXT
+            created_at TEXT,
+            status TEXT DEFAULT 'Pending',
+            admin_note TEXT DEFAULT ''
         )
+    """)
+
+    # Migrate existing databases safely.
+    columns = {
+        row["name"]
+        for row in connection.execute(
+            "PRAGMA table_info(complaints)"
+        ).fetchall()
+    }
+
+    if "status" not in columns:
+        connection.execute("""
+            ALTER TABLE complaints
+            ADD COLUMN status TEXT DEFAULT 'Pending'
+        """)
+
+    if "admin_note" not in columns:
+        connection.execute("""
+            ALTER TABLE complaints
+            ADD COLUMN admin_note TEXT DEFAULT ''
+        """)
+
+    connection.execute("""
+        CREATE INDEX IF NOT EXISTS idx_complaint_reference
+        ON complaints(reference)
+    """)
+
+    connection.execute("""
+        CREATE INDEX IF NOT EXISTS idx_complaint_status
+        ON complaints(status)
     """)
 
     connection.commit()
     connection.close()
 
 
-# HOME PAGE
+# ==========================================
+# 3. HOME PAGE
+# ==========================================
+
 @app.route("/")
 def home():
     return render_template("index.html")
 
 
-# API STATUS
 @app.route("/api/status")
 def status():
     return jsonify({
-        "service": "CyberSaathi API",
-        "status": "ok"
+        "service": "CyberSaathi AI",
+        "status": "ok",
+        "version": "2.0"
     })
 
 
-# PHISHING URL SCANNER
+# ==========================================
+# 4. PHISHING URL SCANNER
+# ==========================================
+
+TRUSTED_DOMAINS = [
+    "google.com",
+    "youtube.com",
+    "microsoft.com",
+    "wikipedia.org"
+]
+
+
 def scan_url(url):
     url = url.strip()
 
@@ -88,44 +191,65 @@ def scan_url(url):
         parsed = urlparse(url)
         hostname = (parsed.hostname or "").lower()
 
-        if (
-            not hostname
-            or "." not in hostname
-            or not re.fullmatch(r"[a-z0-9.-]+", hostname)
-            or ".." in hostname
-            or hostname.startswith(".")
-            or hostname.endswith(".")
-        ):
+        if not hostname:
+            raise ValueError("Missing hostname")
+
+        if parsed.scheme not in ("http", "https"):
+            raise ValueError("Unsupported scheme")
+
+        if parsed.username or parsed.password:
             return {
-                "status": "Invalid URL",
-                "message": "The URL format is invalid.",
-                "warnings": []
+                "status": "Potential Warning Signs Found",
+                "message": "This URL contains embedded login credentials.",
+                "warnings": [
+                    "URL contains embedded login credentials."
+                ]
             }
+
+        try:
+            ipaddress.ip_address(hostname)
+            is_ip = True
+        except ValueError:
+            is_ip = False
+
+        if not is_ip:
+            try:
+                hostname = hostname.encode("idna").decode("ascii")
+            except UnicodeError:
+                raise ValueError("Invalid domain")
+
+            if (
+                "." not in hostname
+                or not re.fullmatch(r"[a-z0-9.-]+", hostname)
+                or ".." in hostname
+                or hostname.startswith(".")
+                or hostname.endswith(".")
+            ):
+                raise ValueError("Invalid domain")
 
         warnings = []
 
-        if parsed.username or parsed.password:
-            warnings.append("URL contains embedded login credentials.")
+        if parsed.scheme != "https":
+            warnings.append(
+                "URL does not use HTTPS encryption."
+            )
 
         if hostname.startswith("xn--") or ".xn--" in hostname:
-            warnings.append("Domain uses encoded characters.")
+            warnings.append(
+                "Domain uses encoded characters."
+            )
 
-        if parsed.scheme != "https":
-            warnings.append("URL does not use HTTPS encryption.")
+        if is_ip:
+            warnings.append(
+                "URL uses an IP address instead of a domain name."
+            )
 
-        trusted_domains = [
-            "youtube.com",
-            "google.com",
-            "microsoft.com",
-            "wikipedia.org"
-        ]
-
-        recognized = any(
+        trusted = any(
             hostname == domain or hostname.endswith("." + domain)
-            for domain in trusted_domains
+            for domain in TRUSTED_DOMAINS
         )
 
-        if not recognized:
+        if not trusted:
             warnings.append(
                 "Domain is not in the recognized-domain list."
             )
@@ -139,14 +263,17 @@ def scan_url(url):
 
         return {
             "status": "No Basic Warning Signs Detected",
-            "message": "No basic warning signs detected. This does not guarantee that the website is safe.",
+            "message": (
+                "No basic warning signs detected. "
+                "This does not guarantee that the website is safe."
+            ),
             "warnings": []
         }
 
-    except ValueError:
+    except (ValueError, UnicodeError):
         return {
             "status": "Invalid URL",
-            "message": "Unable to process this URL.",
+            "message": "The URL format is invalid.",
             "warnings": []
         }
 
@@ -157,24 +284,47 @@ def phishing_check():
     url = data.get("url", "")
 
     if not isinstance(url, str) or not url.strip():
-        return jsonify({"error": "Please enter a valid URL."}), 400
+        return jsonify({
+            "error": "Please enter a valid URL."
+        }), 400
 
     return jsonify(scan_url(url))
 
 
-# SCAM MESSAGE CHECKER
+# ==========================================
+# 5. SCAM MESSAGE DETECTOR
+# ==========================================
+
 @app.route("/api/scam-check", methods=["POST"])
 def scam_check():
     data = request.get_json(silent=True) or {}
     message = data.get("message", "")
 
     if not isinstance(message, str) or not message.strip():
-        return jsonify({"error": "Please enter a message."}), 400
+        return jsonify({
+            "error": "Please enter a message."
+        }), 400
+
+    if len(message) > 5000:
+        return jsonify({
+            "error": "Message is too long."
+        }), 400
 
     keywords = [
-        "urgent", "otp", "password", "bank account",
-        "send money", "prize", "winner", "click here",
-        "verify account", "limited time"
+        "urgent",
+        "otp",
+        "password",
+        "bank account",
+        "send money",
+        "prize",
+        "winner",
+        "click here",
+        "verify account",
+        "limited time",
+        "account blocked",
+        "kyc update",
+        "claim reward",
+        "free gift"
     ]
 
     found = [
@@ -184,15 +334,23 @@ def scam_check():
 
     return jsonify({
         "warning_signs": found,
+        "risk_level": (
+            "Needs Attention" if found else "No Common Keywords Found"
+        ),
         "message": (
-            "This message contains common scam warning signs. Verify it independently."
+            "This message contains common scam warning signs. "
+            "Verify it independently."
             if found else
-            "No common scam keywords detected. Still be careful with unknown messages."
+            "No common scam keywords detected. "
+            "Still be careful with unknown messages."
         )
     })
 
 
-# DAILY CYBER TIPS
+# ==========================================
+# 6. DAILY CYBER TIPS
+# ==========================================
+
 @app.route("/api/tips")
 def tips():
     return jsonify({
@@ -203,39 +361,59 @@ def tips():
             "Enable two-factor authentication.",
             "Keep your phone and apps updated.",
             "Verify payment requests before sending money.",
-            "Use official websites for online services."
+            "Use official websites for online services.",
+            "Never install unknown APK files.",
+            "Check website addresses before logging in.",
+            "Report suspicious online financial transactions."
         ]
     })
 
 
-# CYBER ASSISTANT
+# ==========================================
+# 7. CYBERSAATHI ASSISTANT
+# ==========================================
+
 @app.route("/api/assistant", methods=["POST"])
 def assistant():
     data = request.get_json(silent=True) or {}
     question = data.get("question", "")
 
     if not isinstance(question, str) or not question.strip():
-        return jsonify({"error": "Please enter a question."}), 400
+        return jsonify({
+            "error": "Please enter a question."
+        }), 400
+
+    if len(question) > 2000:
+        return jsonify({
+            "error": "Question is too long."
+        }), 400
 
     question = question.lower()
 
-    if any(word in question for word in ["phishing", "fake link"]):
+    if any(word in question for word in [
+        "phishing", "fake link", "suspicious link"
+    ]):
         answer = (
             "Phishing is an attempt to trick people into revealing "
-            "personal information. Check website addresses and avoid unknown links."
+            "personal information. Check website addresses and "
+            "avoid unknown links."
         )
 
-    elif any(word in question for word in ["otp", "password"]):
+    elif any(word in question for word in [
+        "otp", "password", "pin"
+    ]):
         answer = (
-            "Never share your OTP or password with anyone. "
+            "Never share your OTP, PIN or password with anyone. "
             "Use unique passwords and enable two-factor authentication."
         )
 
-    elif any(word in question for word in ["fraud", "scam", "money"]):
+    elif any(word in question for word in [
+        "fraud", "scam", "money", "payment"
+    ]):
         answer = (
             "Be careful with unexpected payment requests. "
-            "In India, report financial cyber fraud through the official portal "
-            "or call 1930."
+            "For financial cyber fraud in India, contact 1930 "
+            "or use the official cybercrime portal."
         )
 
     elif "social media" in question:
@@ -244,16 +422,34 @@ def assistant():
             "share sensitive personal information publicly."
         )
 
+    elif "cybercrime" in question or "complaint" in question:
+        answer = (
+            "You can submit a report through CyberSaathi for "
+            "platform tracking. For an official Indian cybercrime "
+            "complaint, visit https://cybercrime.gov.in/"
+        )
+
+    elif "hacked" in question or "hack" in question:
+        answer = (
+            "Secure your accounts using official recovery options, "
+            "change compromised passwords from a trusted device, "
+            "and enable two-factor authentication."
+        )
+
     else:
         answer = (
-            "Stay alert online. Never share OTPs or passwords, "
-            "verify suspicious messages independently and use official websites."
+            "Welcome to CyberSaathi AI! Stay alert online. "
+            "Never share OTPs or passwords, verify suspicious "
+            "messages independently and use official websites."
         )
 
     return jsonify({"answer": answer})
 
 
-# SUBMIT COMPLAINT
+# ==========================================
+# 8. SUBMIT COMPLAINT
+# ==========================================
+
 @app.route("/api/complaints", methods=["POST"])
 def submit_complaint():
     data = request.get_json(silent=True) or {}
@@ -262,31 +458,44 @@ def submit_complaint():
     description = data.get("description", "")
     incident_date = data.get("date", "")
 
-    if not all(isinstance(value, str) for value in [
-        complaint_type, description, incident_date
-    ]):
-        return jsonify({"error": "Invalid complaint details."}), 400
+    if not all(
+        isinstance(value, str)
+        for value in [
+            complaint_type,
+            description,
+            incident_date
+        ]
+    ):
+        return jsonify({
+            "error": "Invalid complaint details."
+        }), 400
 
     complaint_type = complaint_type.strip()
     description = description.strip()
     incident_date = incident_date.strip()
 
-    allowed_types = [
-        "Online Financial Fraud",
-        "Phishing",
-        "Social Media Harassment",
-        "Identity Theft",
-        "Other Cybercrime"
-    ]
-
-    if complaint_type not in allowed_types:
-        return jsonify({"error": "Please select a valid complaint type."}), 400
+    if complaint_type not in COMPLAINT_TYPES:
+        return jsonify({
+            "error": "Please select a valid complaint type."
+        }), 400
 
     if not description:
-        return jsonify({"error": "Description is required."}), 400
+        return jsonify({
+            "error": "Description is required."
+        }), 400
 
     if len(description) > 5000:
-        return jsonify({"error": "Description is too long."}), 400
+        return jsonify({
+            "error": "Description is too long."
+        }), 400
+
+    if incident_date:
+        try:
+            datetime.strptime(incident_date, "%Y-%m-%d")
+        except ValueError:
+            return jsonify({
+                "error": "Invalid incident date."
+            }), 400
 
     reference = "CS-" + uuid.uuid4().hex[:8].upper()
 
@@ -294,15 +503,22 @@ def submit_complaint():
 
     try:
         connection.execute("""
-            INSERT INTO complaints
-            (reference, complaint_type, description, incident_date, created_at)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO complaints (
+                reference,
+                complaint_type,
+                description,
+                incident_date,
+                created_at,
+                status
+            )
+            VALUES (?, ?, ?, ?, ?, ?)
         """, (
             reference,
             complaint_type,
             description,
             incident_date,
-            datetime.now().isoformat()
+            datetime.now().isoformat(timespec="seconds"),
+            "Pending"
         ))
 
         connection.commit()
@@ -310,57 +526,80 @@ def submit_complaint():
     except sqlite3.Error:
         connection.rollback()
         app.logger.exception("Complaint saving failed")
-        return jsonify({"error": "Unable to save complaint."}), 500
+
+        return jsonify({
+            "error": "Unable to save complaint."
+        }), 500
 
     finally:
         connection.close()
 
     return jsonify({
-        "message": "Complaint successfully saved in the CyberSaathi database.",
+        "message": "Complaint successfully submitted.",
         "reference": reference,
+        "status": "Pending",
         "official_portal": "https://cybercrime.gov.in/"
-    })
+    }), 201
 
 
-# TRACK COMPLAINT
+# ==========================================
+# 9. TRACK COMPLAINT
+# ==========================================
+
 @app.route("/api/complaints/<reference>")
 def track_complaint(reference):
     connection = get_db()
 
     complaint = connection.execute("""
-        SELECT reference, complaint_type, incident_date, created_at
+        SELECT
+            reference,
+            complaint_type,
+            incident_date,
+            created_at,
+            status
         FROM complaints
         WHERE reference = ?
-    """, (reference,)).fetchone()
+    """, (reference.strip().upper(),)).fetchone()
 
     connection.close()
 
     if complaint is None:
-        return jsonify({"error": "Reference not found."}), 404
+        return jsonify({
+            "error": "Reference not found."
+        }), 404
 
     return jsonify(dict(complaint))
 
 
-# ADMIN LOGIN
+# ==========================================
+# 10. ADMIN LOGIN
+# ==========================================
+
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
 
     if not ADMIN_PASSWORD:
-        return "Admin password is not configured in Render.", 503
+        return (
+            "Admin password is not configured. "
+            "Set ADMIN_PASSWORD in your deployment environment.",
+            503
+        )
+
+    if is_admin():
+        return redirect(url_for("admin"))
 
     if request.method == "POST":
         password = request.form.get("password", "")
-        csrf_token = request.form.get("csrf_token", "")
+        token = request.form.get("csrf_token", "")
 
-        if not hmac.compare_digest(
-            csrf_token,
-            session.get("login_csrf", "")
-        ):
-            return "Invalid request. Please refresh and try again.", 400
+        if not verify_csrf(token):
+            return "Invalid request. Refresh and try again.", 400
 
         if hmac.compare_digest(password, ADMIN_PASSWORD):
             session.clear()
             session["admin_logged_in"] = True
+            csrf_token()
+
             return redirect(url_for("admin"))
 
         return render_template_string("""
@@ -368,8 +607,7 @@ def admin_login():
             <a href="{{ url_for('admin_login') }}">Try again</a>
         """), 401
 
-    token = secrets.token_urlsafe(32)
-    session["login_csrf"] = token
+    token = csrf_token()
 
     return render_template_string("""
     <!DOCTYPE html>
@@ -377,8 +615,10 @@ def admin_login():
     <head>
         <title>CyberSaathi Admin Login</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
+
         <style>
             * { box-sizing: border-box; }
+
             body {
                 background: #0b1628;
                 color: white;
@@ -390,40 +630,57 @@ def admin_login():
                 margin: 0;
                 padding: 20px;
             }
+
             form {
                 background: #172a43;
                 padding: 30px;
-                border-radius: 12px;
+                border-radius: 14px;
                 width: 100%;
-                max-width: 350px;
+                max-width: 380px;
                 border: 1px solid #38bdf8;
             }
+
             h2 { color: #38bdf8; }
+
             input {
                 width: 100%;
-                padding: 13px;
+                padding: 14px;
                 margin: 15px 0;
-                border-radius: 6px;
+                border-radius: 7px;
                 border: none;
             }
+
             button {
                 background: #0284c7;
                 color: white;
-                padding: 13px;
+                padding: 14px;
                 border: none;
-                border-radius: 6px;
+                border-radius: 7px;
                 width: 100%;
                 cursor: pointer;
             }
         </style>
     </head>
+
     <body>
         <form method="POST">
             <h2>CyberSaathi Admin</h2>
-            <p>Enter administrator password.</p>
-            <input type="hidden" name="csrf_token" value="{{ token }}">
-            <input type="password" name="password"
-                   placeholder="Admin Password" required>
+            <p>Administrator Login</p>
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ token }}"
+            >
+
+            <input
+                type="password"
+                name="password"
+                placeholder="Admin Password"
+                required
+                autocomplete="current-password"
+            >
+
             <button type="submit">Login</button>
         </form>
     </body>
@@ -431,20 +688,56 @@ def admin_login():
     """, token=token)
 
 
-# ADMIN DASHBOARD
+# ==========================================
+# 11. ADMIN DASHBOARD
+# ==========================================
+
 @app.route("/admin")
 def admin():
 
-    if not session.get("admin_logged_in"):
+    if not is_admin():
         return redirect(url_for("admin_login"))
+
+    search = request.args.get("search", "").strip()
+    selected_status = request.args.get("status", "").strip()
 
     connection = get_db()
 
-    complaints = connection.execute("""
-        SELECT *
-        FROM complaints
-        ORDER BY id DESC
-    """).fetchall()
+    total = connection.execute("""
+        SELECT COUNT(*) FROM complaints
+    """).fetchone()[0]
+
+    stats = {}
+
+    for status_name in STATUSES:
+        stats[status_name] = connection.execute(
+            "SELECT COUNT(*) FROM complaints WHERE status = ?",
+            (status_name,)
+        ).fetchone()[0]
+
+    query = "SELECT * FROM complaints WHERE 1=1"
+    params = []
+
+    if search:
+        query += """
+            AND (
+                reference LIKE ?
+                OR complaint_type LIKE ?
+                OR description LIKE ?
+            )
+        """
+        keyword = "%" + search + "%"
+        params.extend([keyword, keyword, keyword])
+
+    if selected_status in STATUSES:
+        query += " AND status = ?"
+        params.append(selected_status)
+
+    query += " ORDER BY id DESC"
+
+    complaints = connection.execute(
+        query, params
+    ).fetchall()
 
     connection.close()
 
@@ -453,7 +746,9 @@ def admin():
     <html>
     <head>
         <title>CyberSaathi Admin Dashboard</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1">
 
         <style>
             * { box-sizing: border-box; }
@@ -471,62 +766,254 @@ def admin():
             .top {
                 background: #172a43;
                 padding: 20px;
-                border-radius: 10px;
+                border-radius: 12px;
                 margin-bottom: 20px;
+            }
+
+            .stats {
+                display: grid;
+                grid-template-columns:
+                    repeat(auto-fit, minmax(145px, 1fr));
+                gap: 12px;
+                margin-bottom: 25px;
+            }
+
+            .stat {
+                background: #172a43;
+                padding: 18px;
+                border-radius: 10px;
+                border: 1px solid #29445f;
+            }
+
+            .stat h2 {
+                color: #38bdf8;
+                margin: 8px 0;
+            }
+
+            .toolbar {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+
+            input, select {
+                padding: 12px;
+                border-radius: 7px;
+                border: none;
+                min-width: 130px;
+            }
+
+            button, .btn {
+                background: #0284c7;
+                color: white;
+                padding: 11px 15px;
+                border: none;
+                border-radius: 7px;
+                cursor: pointer;
+                text-decoration: none;
+                display: inline-block;
             }
 
             .complaint {
                 background: #172a43;
                 padding: 20px;
                 margin: 15px 0;
-                border-radius: 10px;
-                border: 1px solid #38bdf8;
+                border-radius: 12px;
+                border: 1px solid #29445f;
                 overflow-wrap: anywhere;
             }
 
             .complaint h3 { color: #67e8f9; }
 
-            .logout {
-                display: inline-block;
-                background: #0284c7;
-                color: white;
-                padding: 12px 20px;
-                border-radius: 6px;
-                text-decoration: none;
+            .complaint p { line-height: 1.5; }
+
+            .status-form {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                margin-top: 15px;
             }
 
+            .status-form select {
+                background: #fff;
+                color: #111;
+            }
+
+            .logout { background: #dc2626; }
+
             .empty { color: #fbbf24; }
+
+            @media(max-width: 500px) {
+                body { padding: 12px; }
+                .toolbar input { width: 100%; }
+            }
         </style>
     </head>
 
     <body>
+
         <h1>CyberSaathi Admin Dashboard</h1>
 
         <div class="top">
-            <h2>Total Complaints: {{ complaints|length }}</h2>
-            <a class="logout" href="{{ url_for('admin_logout') }}">
+            <h2>Welcome, Administrator</h2>
+            <p>Manage and monitor submitted complaints.</p>
+
+            <a class="btn"
+               href="{{ url_for('admin_export') }}">
+                Export CSV
+            </a>
+
+            <a class="btn logout"
+               href="{{ url_for('admin_logout') }}">
                 Logout
             </a>
         </div>
+
+        <div class="stats">
+
+            <div class="stat">
+                <p>Total Complaints</p>
+                <h2>{{ total }}</h2>
+            </div>
+
+            <div class="stat">
+                <p>Pending</p>
+                <h2>{{ stats['Pending'] }}</h2>
+            </div>
+
+            <div class="stat">
+                <p>Under Review</p>
+                <h2>{{ stats['Under Review'] }}</h2>
+            </div>
+
+            <div class="stat">
+                <p>Resolved</p>
+                <h2>{{ stats['Resolved'] }}</h2>
+            </div>
+
+            <div class="stat">
+                <p>Rejected</p>
+                <h2>{{ stats['Rejected'] }}</h2>
+            </div>
+
+        </div>
+
+        <h2>Complaint Management</h2>
+
+        <form class="toolbar" method="GET">
+
+            <input
+                type="text"
+                name="search"
+                placeholder="Search complaints..."
+                value="{{ search }}"
+            >
+
+            <select name="status">
+                <option value="">All Statuses</option>
+
+                {% for s in statuses %}
+                    <option
+                        value="{{ s }}"
+                        {% if selected_status == s %}selected{% endif %}
+                    >
+                        {{ s }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <button type="submit">Search</button>
+
+            <a class="btn" href="{{ url_for('admin') }}">
+                Reset
+            </a>
+
+        </form>
 
         {% if complaints %}
 
             {% for c in complaints %}
 
                 <div class="complaint">
+
                     <h3>Complaint #{{ c.id }}</h3>
 
-                    <p><b>Reference ID:</b> {{ c.reference }}</p>
+                    <p>
+                        <b>Reference:</b>
+                        {{ c.reference }}
+                    </p>
 
-                    <p><b>Complaint Type:</b> {{ c.complaint_type }}</p>
+                    <p>
+                        <b>Type:</b>
+                        {{ c.complaint_type }}
+                    </p>
 
-                    <p><b>Description:</b> {{ c.description }}</p>
+                    <p>
+                        <b>Description:</b>
+                        {{ c.description }}
+                    </p>
 
-                    <p><b>Incident Date:</b>
+                    <p>
+                        <b>Incident Date:</b>
                         {{ c.incident_date or 'Not provided' }}
                     </p>
 
-                    <p><b>Submitted At:</b> {{ c.created_at }}</p>
+                    <p>
+                        <b>Submitted:</b>
+                        {{ c.created_at }}
+                    </p>
+
+                    <p>
+                        <b>Current Status:</b>
+                        {{ c.status }}
+                    </p>
+
+                    <p>
+                        <b>Admin Note:</b>
+                        {{ c.admin_note or 'No note' }}
+                    </p>
+
+                    <form
+                        class="status-form"
+                        method="POST"
+                        action="{{ url_for(
+                            'update_complaint',
+                            complaint_id=c.id
+                        ) }}"
+                    >
+
+                        <input
+                            type="hidden"
+                            name="csrf_token"
+                            value="{{ token }}"
+                        >
+
+                        <select name="status" required>
+                            {% for s in statuses %}
+                                <option
+                                    value="{{ s }}"
+                                    {% if c.status == s %}selected{% endif %}
+                                >
+                                    {{ s }}
+                                </option>
+                            {% endfor %}
+                        </select>
+
+                        <input
+                            type="text"
+                            name="admin_note"
+                            placeholder="Admin note (optional)"
+                            value="{{ c.admin_note }}"
+                            maxlength="500"
+                        >
+
+                        <button type="submit">
+                            Update Status
+                        </button>
+
+                    </form>
+
                 </div>
 
             {% endfor %}
@@ -534,27 +1021,159 @@ def admin():
         {% else %}
 
             <div class="complaint">
-                <p class="empty">No complaints submitted yet.</p>
+                <p class="empty">
+                    No complaints found.
+                </p>
             </div>
 
         {% endif %}
 
     </body>
     </html>
-    """, complaints=complaints)
+    """,
+        complaints=complaints,
+        total=total,
+        stats=stats,
+        search=search,
+        selected_status=selected_status,
+        statuses=STATUSES,
+        token=csrf_token()
+    )
 
 
-# ADMIN LOGOUT
+# ==========================================
+# 12. UPDATE COMPLAINT STATUS
+# ==========================================
+
+@app.route(
+    "/admin/complaint/<int:complaint_id>/update",
+    methods=["POST"]
+)
+def update_complaint(complaint_id):
+
+    if not is_admin():
+        return redirect(url_for("admin_login"))
+
+    if not verify_csrf(request.form.get("csrf_token", "")):
+        return "Invalid request. Refresh and try again.", 400
+
+    new_status = request.form.get("status", "").strip()
+    admin_note = request.form.get("admin_note", "").strip()
+
+    if new_status not in STATUSES:
+        return "Invalid complaint status.", 400
+
+    if len(admin_note) > 500:
+        return "Admin note is too long.", 400
+
+    connection = get_db()
+
+    result = connection.execute("""
+        UPDATE complaints
+        SET status = ?, admin_note = ?
+        WHERE id = ?
+    """, (
+        new_status,
+        admin_note,
+        complaint_id
+    ))
+
+    connection.commit()
+    connection.close()
+
+    if result.rowcount == 0:
+        return "Complaint not found.", 404
+
+    return redirect(url_for("admin"))
+
+
+# ==========================================
+# 13. EXPORT COMPLAINT REPORT
+# ==========================================
+
+@app.route("/admin/export")
+def admin_export():
+
+    if not is_admin():
+        return redirect(url_for("admin_login"))
+
+    connection = get_db()
+
+    complaints = connection.execute("""
+        SELECT
+            id,
+            reference,
+            complaint_type,
+            description,
+            incident_date,
+            created_at,
+            status,
+            admin_note
+        FROM complaints
+        ORDER BY id DESC
+    """).fetchall()
+
+    connection.close()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    writer.writerow([
+        "ID",
+        "Reference",
+        "Complaint Type",
+        "Description",
+        "Incident Date",
+        "Created At",
+        "Status",
+        "Admin Note"
+    ])
+
+    for c in complaints:
+        writer.writerow([
+            c["id"],
+            c["reference"],
+            c["complaint_type"],
+            c["description"],
+            c["incident_date"],
+            c["created_at"],
+            c["status"],
+            c["admin_note"]
+        ])
+
+    response = make_response("\ufeff" + output.getvalue())
+
+    response.headers["Content-Type"] = (
+        "text/csv; charset=utf-8"
+    )
+
+    response.headers["Content-Disposition"] = (
+        "attachment; filename=cybersaathi_complaints.csv"
+    )
+
+    return response
+
+
+# ==========================================
+# 14. ADMIN LOGOUT
+# ==========================================
+
 @app.route("/admin/logout")
 def admin_logout():
     session.clear()
     return redirect(url_for("admin_login"))
 
 
-# CREATE DATABASE
+# ==========================================
+# 15. CREATE DATABASE & START APPLICATION
+# ==========================================
+
 create_database()
 
 
-# START APPLICATION
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000)),
+        debug=False
+    )
