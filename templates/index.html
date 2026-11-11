@@ -9,410 +9,417 @@
 
 <style>
 :root {
-    --bg: #071426;
-    --panel: #10243d;
-    --panel-light: #172f4c;
-    --blue: #38bdf8;
-    --cyan: #22d3ee;
-    --text: #f1f5f9;
-    --muted: #a8b8ca;
-    --border: rgba(148, 163, 184, .18);
-    --green: #34d399;
+    --bg:#071426;
+    --panel:#10243d;
+    --blue:#38bdf8;
+    --cyan:#22d3ee;
+    --text:#f1f5f9;
+    --muted:#a8b8ca;
+    --border:rgba(148,163,184,.18);
+    --green:#34d399;
 }
 
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    scroll-behavior: smooth;
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    scroll-behavior:smooth;
 }
 
 body {
-    font-family: Arial, Helvetica, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.6;
+    font-family:Arial,Helvetica,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.6;
 }
 
-a {
-    text-decoration: none;
-    color: inherit;
-}
-
-button, input, textarea, select {
-    font: inherit;
-}
+a {text-decoration:none;color:inherit}
+button,input,textarea,select {font:inherit}
 
 .container {
-    width: min(1150px, 92%);
-    margin: auto;
+    width:min(1150px,92%);
+    margin:auto;
 }
 
 /* NAVIGATION */
 
 header {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    background: rgba(7, 20, 38, .94);
-    backdrop-filter: blur(15px);
-    border-bottom: 1px solid var(--border);
+    position:sticky;
+    top:0;
+    z-index:1000;
+    background:rgba(7,20,38,.96);
+    backdrop-filter:blur(15px);
+    border-bottom:1px solid var(--border);
 }
 
 .navbar {
-    min-height: 76px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
+    min-height:76px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
 }
 
 .logo {
-    font-size: 23px;
-    font-weight: 800;
-    color: white;
+    font-size:23px;
+    font-weight:800;
 }
 
-.logo span {
-    color: var(--cyan);
-}
+.logo span,.accent {color:var(--cyan)}
 
 .nav-links {
-    display: flex;
-    align-items: center;
-    gap: 23px;
-    flex-wrap: wrap;
+    display:flex;
+    align-items:center;
+    gap:17px;
+    flex-wrap:wrap;
 }
 
 .nav-links a {
-    color: var(--muted);
-    font-size: 14px;
-    transition: .25s;
+    color:var(--muted);
+    font-size:13px;
+    transition:.2s;
 }
 
-.nav-links a:hover {
-    color: var(--cyan);
-}
-
-.nav-links .account-link {
-    color: var(--cyan);
-    font-weight: bold;
+.nav-links a:hover,.nav-links .account-link {
+    color:var(--cyan);
 }
 
 .menu-btn {
-    display: none;
-    background: transparent;
-    color: white;
-    border: 1px solid var(--border);
-    padding: 8px 12px;
-    border-radius: 8px;
-    cursor: pointer;
+    display:none;
+    background:transparent;
+    color:white;
+    border:1px solid var(--border);
+    padding:8px 12px;
+    border-radius:8px;
+    cursor:pointer;
 }
 
 /* BUTTONS */
 
 .btn {
-    display: inline-block;
-    border: none;
-    border-radius: 9px;
-    padding: 12px 20px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: .25s;
+    display:inline-block;
+    border:none;
+    border-radius:9px;
+    padding:12px 20px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.25s;
 }
 
 .btn-primary {
-    color: #04111f;
-    background: linear-gradient(135deg, var(--cyan), var(--blue));
+    color:#04111f;
+    background:linear-gradient(135deg,var(--cyan),var(--blue));
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(34, 211, 238, .2);
+    transform:translateY(-2px);
+    box-shadow:0 8px 25px rgba(34,211,238,.2);
 }
 
 .btn-outline {
-    border: 1px solid var(--blue);
-    color: var(--blue);
-    background: transparent;
-}
-
-.btn-outline:hover {
-    background: rgba(56, 189, 248, .1);
+    border:1px solid var(--blue);
+    color:var(--blue);
+    background:transparent;
 }
 
 /* HERO */
 
 .hero {
-    min-height: 560px;
-    display: flex;
-    align-items: center;
-    padding: 85px 0;
+    min-height:550px;
+    display:flex;
+    align-items:center;
+    padding:85px 0;
     background:
-        radial-gradient(circle at 85% 30%, rgba(14, 165, 233, .17), transparent 32%),
-        radial-gradient(circle at 15% 80%, rgba(34, 211, 238, .09), transparent 30%);
+    radial-gradient(circle at 85% 30%,rgba(14,165,233,.17),transparent 32%),
+    radial-gradient(circle at 15% 80%,rgba(34,211,238,.09),transparent 30%);
 }
 
-.hero-content {
-    max-width: 760px;
-}
+.hero-content {max-width:760px}
 
 .eyebrow {
-    display: inline-block;
-    color: var(--cyan);
-    background: rgba(34, 211, 238, .09);
-    border: 1px solid rgba(34, 211, 238, .25);
-    padding: 7px 14px;
-    border-radius: 30px;
-    font-size: 13px;
-    margin-bottom: 22px;
+    display:inline-block;
+    color:var(--cyan);
+    background:rgba(34,211,238,.09);
+    border:1px solid rgba(34,211,238,.25);
+    padding:7px 14px;
+    border-radius:30px;
+    font-size:13px;
+    margin-bottom:22px;
 }
 
 .hero h1 {
-    font-size: clamp(38px, 6vw, 65px);
-    line-height: 1.12;
-    margin-bottom: 22px;
+    font-size:clamp(38px,6vw,65px);
+    line-height:1.12;
+    margin-bottom:22px;
 }
 
-.hero h1 span {
-    color: var(--cyan);
-}
+.hero h1 span {color:var(--cyan)}
 
 .hero p {
-    max-width: 650px;
-    color: var(--muted);
-    font-size: 17px;
-    margin-bottom: 30px;
+    max-width:650px;
+    color:var(--muted);
+    font-size:17px;
+    margin-bottom:30px;
 }
 
 .hero-actions {
-    display: flex;
-    gap: 13px;
-    flex-wrap: wrap;
+    display:flex;
+    gap:13px;
+    flex-wrap:wrap;
 }
 
 /* SECTIONS */
 
 section {
-    padding: 75px 0;
-    scroll-margin-top: 85px;
+    padding:75px 0;
+    scroll-margin-top:85px;
 }
 
 .section-heading {
-    text-align: center;
-    margin-bottom: 40px;
+    text-align:center;
+    margin-bottom:40px;
 }
 
 .section-heading h2 {
-    font-size: clamp(27px, 4vw, 38px);
-    margin-bottom: 10px;
+    font-size:clamp(27px,4vw,38px);
+    margin-bottom:10px;
 }
 
 .section-heading p {
-    color: var(--muted);
-    max-width: 650px;
-    margin: auto;
-}
-
-.accent {
-    color: var(--cyan);
+    color:var(--muted);
+    max-width:650px;
+    margin:auto;
 }
 
 /* CARDS */
 
 .card-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 22px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:22px;
 }
 
 .card {
-    background: linear-gradient(145deg, var(--panel), #0c1c31);
-    border: 1px solid var(--border);
-    border-radius: 17px;
-    padding: 25px;
-    transition: .25s;
+    background:linear-gradient(145deg,var(--panel),#0c1c31);
+    border:1px solid var(--border);
+    border-radius:17px;
+    padding:25px;
+    transition:.25s;
 }
 
 .card:hover {
-    transform: translateY(-5px);
-    border-color: rgba(34, 211, 238, .55);
+    transform:translateY(-5px);
+    border-color:rgba(34,211,238,.55);
 }
 
 .card-icon {
-    width: 48px;
-    height: 48px;
-    display: grid;
-    place-items: center;
-    background: rgba(34, 211, 238, .1);
-    border-radius: 13px;
-    font-size: 24px;
-    margin-bottom: 17px;
+    width:48px;
+    height:48px;
+    display:grid;
+    place-items:center;
+    background:rgba(34,211,238,.1);
+    border-radius:13px;
+    font-size:24px;
+    margin-bottom:17px;
 }
 
-.card h3 {
-    margin-bottom: 10px;
-    font-size: 19px;
-}
+.card h3 {margin-bottom:10px}
+.card p {color:var(--muted);font-size:14px}
 
-.card p {
-    color: var(--muted);
-    font-size: 14px;
-}
-
-/* TOOLS AND FORMS */
+/* TOOLS */
 
 .tool-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 22px;
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:22px;
 }
 
 .tool-card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 25px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:25px;
 }
 
-.tool-card h3 {
-    margin-bottom: 12px;
+.tool-card h3 {margin-bottom:12px}
+
+input,textarea,select {
+    width:100%;
+    background:#07182b;
+    color:white;
+    border:1px solid #29415d;
+    border-radius:9px;
+    padding:13px;
+    margin:9px 0 14px;
+    outline:none;
 }
 
-input, textarea, select {
-    width: 100%;
-    background: #07182b;
-    color: white;
-    border: 1px solid #29415d;
-    border-radius: 9px;
-    padding: 13px;
-    margin: 9px 0 14px;
-    outline: none;
-}
-
-input:focus, textarea:focus, select:focus {
-    border-color: var(--cyan);
-    box-shadow: 0 0 0 3px rgba(34, 211, 238, .1);
+input:focus,textarea:focus,select:focus {
+    border-color:var(--cyan);
 }
 
 textarea {
-    min-height: 115px;
-    resize: vertical;
+    min-height:115px;
+    resize:vertical;
 }
 
-.tool-card .btn {
-    width: 100%;
-}
+.tool-card .btn {width:100%}
 
 .result {
-    display: none;
-    margin-top: 15px;
-    padding: 14px;
-    background: #07182b;
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    color: var(--muted);
-    overflow-wrap: anywhere;
+    display:none;
+    margin-top:15px;
+    padding:14px;
+    background:#07182b;
+    border:1px solid var(--border);
+    border-radius:9px;
+    color:var(--muted);
+    overflow-wrap:anywhere;
 }
 
-.result.show {
-    display: block;
-}
+.result.show {display:block}
 
-/* TIP */
+/* DAILY TIP */
 
 .tip-box {
-    text-align: center;
-    background: linear-gradient(120deg, #102d4b, #123c58);
-    border: 1px solid var(--border);
-    padding: 35px;
-    border-radius: 18px;
+    text-align:center;
+    background:linear-gradient(120deg,#102d4b,#123c58);
+    border:1px solid var(--border);
+    padding:35px;
+    border-radius:18px;
 }
 
 .tip-box h3 {
-    color: var(--cyan);
-    margin-bottom: 12px;
+    color:var(--cyan);
+    margin-bottom:12px;
 }
 
-.tip-box p {
-    color: var(--text);
-    margin-bottom: 18px;
+/* QUIZ */
+
+.quiz-section {
+    background:radial-gradient(circle at top right,#123451,#071426 65%);
+}
+
+.quiz-box {
+    max-width:750px;
+    margin:auto;
+    padding:30px;
+    background:var(--panel);
+    border:1px solid rgba(34,211,238,.3);
+    border-radius:18px;
+}
+
+.quiz-progress {
+    height:8px;
+    background:#263c55;
+    border-radius:20px;
+    overflow:hidden;
+    margin:15px 0 25px;
+}
+
+.quiz-progress-bar {
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,#22d3ee,#38bdf8);
+    transition:width .3s;
+}
+
+.quiz-option {
+    display:block;
+    width:100%;
+    text-align:left;
+    padding:14px;
+    margin:10px 0;
+    background:#07182b;
+    color:white;
+    border:1px solid #29415d;
+    border-radius:9px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.quiz-option:hover:not(:disabled) {
+    border-color:#22d3ee;
+    background:#123451;
+}
+
+.quiz-option:disabled {cursor:default;opacity:.9}
+
+.quiz-option.correct {
+    border-color:#34d399;
+    background:rgba(52,211,153,.12);
+}
+
+.quiz-option.wrong {
+    border-color:#fb7185;
+    background:rgba(251,113,133,.12);
+}
+
+.quiz-feedback {
+    margin-top:18px;
+    color:var(--muted);
+    min-height:28px;
+}
+
+.quiz-score {
+    font-size:35px;
+    font-weight:bold;
+    color:#22d3ee;
+    margin:15px 0;
 }
 
 /* RESOURCES */
 
 .resource-link {
-    display: block;
-    color: var(--cyan);
-    margin-top: 12px;
-    font-weight: bold;
-}
-
-.resource-link:hover {
-    text-decoration: underline;
+    display:block;
+    color:var(--cyan);
+    margin-top:12px;
+    font-weight:bold;
 }
 
 /* FOOTER */
 
 footer {
-    border-top: 1px solid var(--border);
-    padding: 30px 0;
-    text-align: center;
-    color: var(--muted);
-    font-size: 13px;
+    border-top:1px solid var(--border);
+    padding:30px 0;
+    text-align:center;
+    color:var(--muted);
+    font-size:13px;
 }
 
 footer a {
-    color: var(--cyan);
-    margin: 0 8px;
+    color:var(--cyan);
+    margin:0 8px;
 }
 
 /* RESPONSIVE */
 
-@media (max-width: 850px) {
-    .menu-btn {
-        display: block;
-    }
+@media(max-width:900px) {
+    .menu-btn {display:block}
 
     .nav-links {
-        display: none;
-        position: absolute;
-        top: 76px;
-        left: 0;
-        right: 0;
-        padding: 22px;
-        background: #0b1c31;
-        border-bottom: 1px solid var(--border);
-        flex-direction: column;
-        align-items: flex-start;
+        display:none;
+        position:absolute;
+        top:76px;
+        left:0;
+        right:0;
+        padding:22px;
+        background:#0b1c31;
+        border-bottom:1px solid var(--border);
+        flex-direction:column;
+        align-items:flex-start;
     }
 
-    .nav-links.open {
-        display: flex;
-    }
+    .nav-links.open {display:flex}
 
-    .card-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    .card-grid {grid-template-columns:repeat(2,1fr)}
 }
 
-@media (max-width: 600px) {
-    .card-grid, .tool-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .hero {
-        min-height: auto;
-        padding: 75px 0;
-    }
-
-    section {
-        padding: 55px 0;
-    }
-
-    .hero p {
-        font-size: 15px;
-    }
+@media(max-width:600px) {
+    .card-grid,.tool-grid {grid-template-columns:1fr}
+    .hero {min-height:auto;padding:75px 0}
+    section {padding:55px 0}
+    .hero p {font-size:15px}
+    .quiz-box {padding:20px}
 }
 </style>
 </head>
@@ -420,425 +427,521 @@ footer a {
 <body>
 
 <header>
-    <div class="container navbar">
-        <a href="#home" class="logo">Cyber<span>Saathi</span> AI</a>
+<div class="container navbar">
 
-        <button class="menu-btn" id="menuBtn" aria-label="Toggle navigation">
-            ☰
-        </button>
+<a href="#home" class="logo">Cyber<span>Saathi</span> AI</a>
 
-        <nav class="nav-links" id="navLinks">
-            <a href="#home">Home</a>
-            <a href="#awareness">Awareness</a>
-            <a href="#tools">AI Tools</a>
-            <a href="#report">Report</a>
-            <a href="#track">Track</a>
-            <a href="#resources">Resources</a>
+<button class="menu-btn" id="menuBtn" aria-label="Toggle navigation">☰</button>
 
-            {% if session.get('user_id') %}
-                <a href="{{ url_for('dashboard') }}" class="account-link">Dashboard</a>
-                <a href="{{ url_for('logout') }}" class="account-link">Logout</a>
-            {% else %}
-                <a href="{{ url_for('register') }}" class="account-link">Register</a>
-                <a href="{{ url_for('login') }}" class="account-link">Login</a>
-            {% endif %}
-        </nav>
-    </div>
+<nav class="nav-links" id="navLinks">
+<a href="#home">Home</a>
+<a href="#awareness">Awareness</a>
+<a href="#tools">AI Tools</a>
+<a href="#quiz">Cyber Quiz</a>
+<a href="#report">Report</a>
+<a href="#track">Track</a>
+<a href="#resources">Resources</a>
+
+{% if session.get('user_id') %}
+<a href="{{ url_for('dashboard') }}" class="account-link">Dashboard</a>
+<a href="{{ url_for('logout') }}" class="account-link">Logout</a>
+{% else %}
+<a href="{{ url_for('register') }}" class="account-link">Register</a>
+<a href="{{ url_for('login') }}" class="account-link">Login</a>
+{% endif %}
+</nav>
+
+</div>
 </header>
 
 <main>
 
+<!-- HOME -->
+
 <section class="hero" id="home">
-    <div class="container">
-        <div class="hero-content">
-            <span class="eyebrow">🛡️ Your Digital Safety Partner</span>
+<div class="container">
+<div class="hero-content">
 
-            <h1>
-                Stay Safe in the
-                <span>Digital World</span>
-            </h1>
+<span class="eyebrow">🛡️ Your Digital Safety Partner</span>
 
-            <p>
-                CyberSaathi AI helps you identify online scams, understand
-                cyber threats, check suspicious messages and take informed
-                steps towards digital safety.
-            </p>
+<h1>Stay Safe in the <span>Digital World</span></h1>
 
-            <div class="hero-actions">
-                <a href="#tools" class="btn btn-primary">Explore AI Tools →</a>
-                <a href="#awareness" class="btn btn-outline">Learn Cyber Safety</a>
-            </div>
-        </div>
-    </div>
+<p>
+CyberSaathi AI helps you identify online scams, understand cyber threats,
+check suspicious messages and take informed steps towards digital safety.
+</p>
+
+<div class="hero-actions">
+<a href="#tools" class="btn btn-primary">Explore AI Tools →</a>
+<a href="#awareness" class="btn btn-outline">Learn Cyber Safety</a>
+</div>
+
+</div>
+</div>
 </section>
+
+<!-- AWARENESS -->
 
 <section id="awareness">
-    <div class="container">
-        <div class="section-heading">
-            <h2>Cyber Safety <span class="accent">Awareness</span></h2>
-            <p>Learn how to recognise common online threats and protect your digital identity.</p>
-        </div>
+<div class="container">
 
-        <div class="card-grid">
-            <article class="card">
-                <div class="card-icon">🎣</div>
-                <h3>Phishing Attacks</h3>
-                <p>Learn to recognise suspicious links and fake websites designed to steal personal information.</p>
-            </article>
+<div class="section-heading">
+<h2>Cyber Safety <span class="accent">Awareness</span></h2>
+<p>Learn how to recognise online threats and protect your digital identity.</p>
+</div>
 
-            <article class="card">
-                <div class="card-icon">💳</div>
-                <h3>Online Payment Scams</h3>
-                <p>Understand common payment fraud methods and stay alert while making digital transactions.</p>
-            </article>
+<div class="card-grid">
 
-            <article class="card">
-                <div class="card-icon">🔐</div>
-                <h3>Password Protection</h3>
-                <p>Use strong, unique passwords and enable two-factor authentication wherever possible.</p>
-            </article>
+<div class="card">
+<div class="card-icon">🎣</div>
+<h3>Phishing Attacks</h3>
+<p>Recognise suspicious links and fake websites designed to steal personal information.</p>
+</div>
 
-            <article class="card">
-                <div class="card-icon">📱</div>
-                <h3>Social Media Safety</h3>
-                <p>Protect your personal information and be careful about unknown accounts and messages.</p>
-            </article>
+<div class="card">
+<div class="card-icon">💳</div>
+<h3>Online Payment Scams</h3>
+<p>Understand common payment fraud methods and stay alert during digital transactions.</p>
+</div>
 
-            <article class="card">
-                <div class="card-icon">⚠️</div>
-                <h3>Identity Theft</h3>
-                <p>Understand how personal information can be misused and how to protect your identity.</p>
-            </article>
+<div class="card">
+<div class="card-icon">🔐</div>
+<h3>Password Protection</h3>
+<p>Use strong, unique passwords and enable two-factor authentication.</p>
+</div>
 
-            <article class="card">
-                <div class="card-icon">🤖</div>
-                <h3>AI Scam Awareness</h3>
-                <p>Be cautious of suspicious AI-generated messages, impersonation and misleading content.</p>
-            </article>
-        </div>
-    </div>
+<div class="card">
+<div class="card-icon">📱</div>
+<h3>Social Media Safety</h3>
+<p>Protect your personal information and be careful with unknown accounts.</p>
+</div>
+
+<div class="card">
+<div class="card-icon">⚠️</div>
+<h3>Identity Theft</h3>
+<p>Understand how personal information can be misused and how to protect your identity.</p>
+</div>
+
+<div class="card">
+<div class="card-icon">🤖</div>
+<h3>AI Scam Awareness</h3>
+<p>Be cautious of AI-generated impersonation and misleading messages.</p>
+</div>
+
+</div>
+</div>
 </section>
+
+<!-- AI TOOLS -->
 
 <section id="tools">
-    <div class="container">
-        <div class="section-heading">
-            <h2>Smart <span class="accent">AI Tools</span></h2>
-            <p>Use these tools to check suspicious content and learn safer online practices.</p>
-        </div>
+<div class="container">
 
-        <div class="tool-grid">
-            <div class="tool-card">
-                <div class="card-icon">🔎</div>
-                <h3>Phishing URL Checker</h3>
-                <p style="color:var(--muted)">Check a suspicious URL for potential warning signs.</p>
+<div class="section-heading">
+<h2>Smart <span class="accent">AI Tools</span></h2>
+<p>Check suspicious content and learn safer online practices.</p>
+</div>
 
-                <input id="phishingUrl" type="url" placeholder="Enter website URL">
+<div class="tool-grid">
 
-                <button class="btn btn-primary" onclick="checkPhishing()">
-                    Check URL
-                </button>
+<div class="tool-card">
+<div class="card-icon">🔎</div>
+<h3>Phishing URL Checker</h3>
+<p style="color:var(--muted)">Check a suspicious URL for potential warning signs.</p>
+<input id="phishingUrl" type="url" placeholder="Enter website URL">
+<button class="btn btn-primary" onclick="checkPhishing()">Check URL</button>
+<div class="result" id="phishingResult" aria-live="polite"></div>
+</div>
 
-                <div class="result" id="phishingResult" aria-live="polite"></div>
-            </div>
+<div class="tool-card">
+<div class="card-icon">💬</div>
+<h3>Scam Message Checker</h3>
+<p style="color:var(--muted)">Check suspicious messages for possible scam indicators.</p>
+<textarea id="scamMessage" placeholder="Paste a suspicious message..."></textarea>
+<button class="btn btn-primary" onclick="checkScam()">Analyse Message</button>
+<div class="result" id="scamResult" aria-live="polite"></div>
+</div>
 
-            <div class="tool-card">
-                <div class="card-icon">💬</div>
-                <h3>Scam Message Checker</h3>
-                <p style="color:var(--muted)">Check suspicious messages for possible scam indicators.</p>
+<div class="tool-card">
+<div class="card-icon">🤖</div>
+<h3>CyberSaathi Assistant</h3>
+<p style="color:var(--muted)">Ask questions about cyber safety and online security.</p>
+<textarea id="assistantMessage" placeholder="Ask a cyber safety question..."></textarea>
+<button class="btn btn-primary" onclick="askAssistant()">Ask Assistant</button>
+<div class="result" id="assistantResult" aria-live="polite"></div>
+</div>
 
-                <textarea id="scamMessage" placeholder="Paste a suspicious message here..."></textarea>
+<div class="tool-card">
+<div class="card-icon">💡</div>
+<h3>Daily Cyber Safety Tip</h3>
+<p id="dailyTip" style="color:var(--muted)">Get a useful tip to improve your online safety.</p>
+<button class="btn btn-primary" onclick="loadTip()">Get Safety Tip</button>
+</div>
 
-                <button class="btn btn-primary" onclick="checkScam()">
-                    Analyse Message
-                </button>
-
-                <div class="result" id="scamResult" aria-live="polite"></div>
-            </div>
-
-            <div class="tool-card">
-                <div class="card-icon">🤖</div>
-                <h3>CyberSaathi Assistant</h3>
-                <p style="color:var(--muted)">Ask questions about cyber safety and online security.</p>
-
-                <textarea id="assistantMessage" placeholder="Ask a cyber safety question..."></textarea>
-
-                <button class="btn btn-primary" onclick="askAssistant()">
-                    Ask Assistant
-                </button>
-
-                <div class="result" id="assistantResult" aria-live="polite"></div>
-            </div>
-
-            <div class="tool-card">
-                <div class="card-icon">💡</div>
-                <h3>Daily Cyber Safety Tip</h3>
-                <p style="color:var(--muted)" id="dailyTip">Get a useful tip to improve your online safety.</p>
-
-                <button class="btn btn-primary" onclick="loadTip()">
-                    Get Safety Tip
-                </button>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
 </section>
+
+<!-- CYBER SAFETY QUIZ -->
+
+<section id="quiz" class="quiz-section">
+<div class="container">
+
+<div class="section-heading">
+<h2>Cyber Safety <span class="accent">Challenge</span></h2>
+<p>Test your knowledge and become a smarter digital citizen!</p>
+</div>
+
+<div class="quiz-box">
+
+<div id="quizContent">
+
+<p class="accent">CYBERSAATHI KNOWLEDGE TEST</p>
+
+<h3 id="quizQuestion">Ready to test your cyber safety knowledge?</h3>
+
+<div class="quiz-progress">
+<div class="quiz-progress-bar" id="quizProgress"></div>
+</div>
+
+<div id="quizOptions"></div>
+
+<div class="quiz-feedback" id="quizFeedback" aria-live="polite"></div>
+
+<button class="btn btn-primary" id="quizNext" onclick="nextQuizQuestion()" disabled>
+Next Question →
+</button>
+
+</div>
+
+<div id="quizFinal" style="display:none;text-align:center">
+<h3>Quiz Completed!</h3>
+<div class="quiz-score" id="quizScore"></div>
+<p id="quizMessage"></p>
+<button class="btn btn-primary" onclick="startCyberQuiz()">Try Again</button>
+</div>
+
+</div>
+</div>
+</section>
+
+<!-- REPORT -->
 
 <section id="report">
-    <div class="container">
-        <div class="section-heading">
-            <h2>Report a <span class="accent">Cyber Incident</span></h2>
-            <p>Submit an incident through CyberSaathi. Avoid including passwords, OTPs or other sensitive information.</p>
-        </div>
+<div class="container">
 
-        <div class="tool-card" style="max-width:700px;margin:auto">
-            <form id="complaintForm">
-                <label for="complaintType">Incident Type</label>
-                <select id="complaintType" required>
-                    <option value="">Select incident type</option>
-                    <option value="Online Payment Fraud">Online Payment Fraud</option>
-                    <option value="Phishing">Phishing</option>
-                    <option value="Social Media Scam">Social Media Scam</option>
-                    <option value="Identity Theft">Identity Theft</option>
-                    <option value="Other">Other</option>
-                </select>
+<div class="section-heading">
+<h2>Report a <span class="accent">Cyber Incident</span></h2>
+<p>Submit an incident through CyberSaathi. Do not include passwords or OTPs.</p>
+</div>
 
-                <label for="incidentDate">Incident Date</label>
-                <input type="date" id="incidentDate" required>
+<div class="tool-card" style="max-width:700px;margin:auto">
 
-                <label for="complaintDescription">Incident Description</label>
-                <textarea id="complaintDescription" placeholder="Describe what happened..." required></textarea>
+<form id="complaintForm">
 
-                <button class="btn btn-primary" type="submit">Submit Report</button>
-            </form>
+<label for="complaintType">Incident Type</label>
 
-            <div class="result" id="complaintResult" aria-live="polite"></div>
-        </div>
-    </div>
+<select id="complaintType" required>
+<option value="">Select incident type</option>
+<option value="Online Payment Fraud">Online Payment Fraud</option>
+<option value="Phishing">Phishing</option>
+<option value="Social Media Scam">Social Media Scam</option>
+<option value="Identity Theft">Identity Theft</option>
+<option value="Other">Other</option>
+</select>
+
+<label for="incidentDate">Incident Date</label>
+<input type="date" id="incidentDate" required>
+
+<label for="complaintDescription">Incident Description</label>
+<textarea id="complaintDescription" placeholder="Describe what happened..." required></textarea>
+
+<button class="btn btn-primary" type="submit">Submit Report</button>
+
+</form>
+
+<div class="result" id="complaintResult" aria-live="polite"></div>
+
+</div>
+</div>
 </section>
+
+<!-- TRACK -->
 
 <section id="track">
-    <div class="container">
-        <div class="section-heading">
-            <h2>Track Your <span class="accent">Report</span></h2>
-            <p>Enter your complaint reference number to check its current status.</p>
-        </div>
+<div class="container">
 
-        <div class="tool-card" style="max-width:600px;margin:auto">
-            <label for="referenceNumber">Complaint Reference Number</label>
-            <input id="referenceNumber" type="text" placeholder="Enter reference number">
+<div class="section-heading">
+<h2>Track Your <span class="accent">Report</span></h2>
+<p>Enter your complaint reference number to check its status.</p>
+</div>
 
-            <button class="btn btn-primary" onclick="trackComplaint()">Track Report</button>
+<div class="tool-card" style="max-width:600px;margin:auto">
 
-            <div class="result" id="trackingResult" aria-live="polite"></div>
-        </div>
-    </div>
+<label for="referenceNumber">Complaint Reference Number</label>
+<input id="referenceNumber" type="text" placeholder="Enter reference number">
+
+<button class="btn btn-primary" onclick="trackComplaint()">Track Report</button>
+
+<div class="result" id="trackingResult" aria-live="polite"></div>
+
+</div>
+</div>
 </section>
 
+<!-- RESOURCES -->
+
 <section id="resources">
-    <div class="container">
-        <div class="section-heading">
-            <h2>Important <span class="accent">Cyber Resources</span></h2>
-            <p>Find official resources for learning about cybercrime and reporting incidents.</p>
-        </div>
+<div class="container">
 
-        <div class="card-grid">
-            <div class="card">
-                <div class="card-icon">🏛️</div>
-                <h3>National Cyber Crime Portal</h3>
-                <p>Visit the official Government of India portal to report cybercrime.</p>
-                <a class="resource-link" href="https://cybercrime.gov.in/" target="_blank" rel="noopener noreferrer">Visit Official Portal →</a>
-            </div>
+<div class="section-heading">
+<h2>Important <span class="accent">Cyber Resources</span></h2>
+<p>Official resources for learning about cybercrime and reporting incidents.</p>
+</div>
 
-            <div class="card">
-                <div class="card-icon">📞</div>
-                <h3>Cyber Financial Fraud Helpline</h3>
-                <p>For cyber financial fraud in India, call the national helpline as soon as possible.</p>
-                <a class="resource-link" href="tel:1930">Call 1930 →</a>
-            </div>
+<div class="card-grid">
 
-            <div class="card">
-                <div class="card-icon">🛡️</div>
-                <h3>Stay Informed</h3>
-                <p>Never share your OTP, PIN, passwords or banking details with unknown people.</p>
-                <a class="resource-link" href="#awareness">Explore Safety Tips →</a>
-            </div>
-        </div>
-    </div>
+<div class="card">
+<div class="card-icon">🏛️</div>
+<h3>National Cyber Crime Portal</h3>
+<p>Visit the official Government of India portal to report cybercrime.</p>
+<a class="resource-link" href="https://cybercrime.gov.in/" target="_blank" rel="noopener noreferrer">Visit Official Portal →</a>
+</div>
+
+<div class="card">
+<div class="card-icon">📞</div>
+<h3>Cyber Financial Fraud Helpline</h3>
+<p>For cyber financial fraud in India, call the helpline as soon as possible.</p>
+<a class="resource-link" href="tel:1930">Call 1930 →</a>
+</div>
+
+<div class="card">
+<div class="card-icon">🛡️</div>
+<h3>Stay Informed</h3>
+<p>Never share your OTP, PIN, passwords or banking details with unknown people.</p>
+<a class="resource-link" href="#awareness">Explore Safety Tips →</a>
+</div>
+
+</div>
+</div>
 </section>
 
 </main>
 
+<!-- FOOTER -->
+
 <footer>
-    <div class="container">
-        <p>© 2026 CyberSaathi AI. Promoting a safer digital India.</p>
-        <p style="margin-top:10px">
-            <a href="#home">Home</a>
-            <a href="#awareness">Awareness</a>
-            <a href="#resources">Resources</a>
-            <a href="{{ url_for('admin_login') }}">Admin Login</a>
-        </p>
-    </div>
+<div class="container">
+
+<p>© 2026 CyberSaathi AI. Promoting a safer digital India.</p>
+
+<p style="margin-top:10px">
+<a href="#home">Home</a>
+<a href="#awareness">Awareness</a>
+<a href="#quiz">Cyber Quiz</a>
+<a href="#resources">Resources</a>
+<a href="{{ url_for('admin_login') }}">Admin Login</a>
+</p>
+
+</div>
 </footer>
 
 <script>
+
+/* NAVIGATION */
+
 const menuBtn = document.getElementById("menuBtn");
 const navLinks = document.getElementById("navLinks");
 
-menuBtn.addEventListener("click", () => {
+menuBtn.addEventListener("click",()=>{
     navLinks.classList.toggle("open");
 });
 
-navLinks.querySelectorAll("a").forEach(link => {
-    link.addEventListener("click", () => navLinks.classList.remove("open"));
+navLinks.querySelectorAll("a").forEach(link=>{
+    link.addEventListener("click",()=>{
+        navLinks.classList.remove("open");
+    });
 });
 
-function escapeHTML(value) {
-    return String(value ?? "").replace(/[&<>"']/g, char => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#039;"
+/* SAFE HTML */
+
+function escapeHTML(value){
+    return String(value ?? "").replace(/[&<>"']/g,char=>({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#039;"
     })[char]);
 }
 
-function showResult(id, content) {
-    const element = document.getElementById(id);
-    element.innerHTML = content;
+function showResult(id,content){
+    const element=document.getElementById(id);
+    element.innerHTML=content;
     element.classList.add("show");
 }
 
-async function apiRequest(url, options = {}) {
-    const response = await fetch(url, {
+/* API REQUEST */
+
+async function apiRequest(url,options={}){
+    const response=await fetch(url,{
         ...options,
-        headers: {
-            "Content-Type": "application/json",
+        headers:{
+            "Content-Type":"application/json",
             ...(options.headers || {})
         }
     });
 
-    const data = await response.json().catch(() => ({}));
+    const data=await response.json().catch(()=>({}));
 
-    if (!response.ok) {
+    if(!response.ok){
         throw new Error(data.message || "The request could not be completed.");
     }
 
     return data;
 }
 
-async function checkPhishing() {
-    const url = document.getElementById("phishingUrl").value.trim();
+/* PHISHING CHECKER */
 
-    if (!url) {
-        showResult("phishingResult", "Please enter a URL first.");
+async function checkPhishing(){
+
+    const url=document.getElementById("phishingUrl").value.trim();
+
+    if(!url){
+        showResult("phishingResult","Please enter a URL first.");
         return;
     }
 
-    showResult("phishingResult", "Checking URL...");
+    showResult("phishingResult","Checking URL...");
 
-    try {
-        const data = await apiRequest("/api/phishing-check", {
-            method: "POST",
-            body: JSON.stringify({url})
+    try{
+        const data=await apiRequest("/api/phishing-check",{
+            method:"POST",
+            body:JSON.stringify({url})
         });
 
-        const reasons = Array.isArray(data.reasons)
-            ? data.reasons.map(item => `<li>${escapeHTML(item)}</li>`).join("")
+        const reasons=Array.isArray(data.reasons)
+            ? data.reasons.map(item=>`<li>${escapeHTML(item)}</li>`).join("")
             : "";
 
-        showResult("phishingResult", `
+        showResult("phishingResult",`
             <strong>${escapeHTML(data.result || "Analysis complete")}</strong>
             <p>${escapeHTML(data.message || "")}</p>
             <p>Risk: ${escapeHTML(data.risk || "Not specified")}</p>
             ${reasons ? `<ul>${reasons}</ul>` : ""}
         `);
-    } catch (error) {
-        showResult("phishingResult", escapeHTML(error.message));
+
+    }catch(error){
+        showResult("phishingResult",escapeHTML(error.message));
     }
 }
 
-async function checkScam() {
-    const message = document.getElementById("scamMessage").value.trim();
+/* SCAM CHECKER */
 
-    if (!message) {
-        showResult("scamResult", "Please enter a message first.");
+async function checkScam(){
+
+    const message=document.getElementById("scamMessage").value.trim();
+
+    if(!message){
+        showResult("scamResult","Please enter a message first.");
         return;
     }
 
-    showResult("scamResult", "Analysing message...");
+    showResult("scamResult","Analysing message...");
 
-    try {
-        const data = await apiRequest("/api/scam-check", {
-            method: "POST",
-            body: JSON.stringify({message})
+    try{
+        const data=await apiRequest("/api/scam-check",{
+            method:"POST",
+            body:JSON.stringify({message})
         });
 
-        const indicators = Array.isArray(data.indicators)
-            ? data.indicators.map(item => `<li>${escapeHTML(item)}</li>`).join("")
+        const indicators=Array.isArray(data.indicators)
+            ? data.indicators.map(item=>`<li>${escapeHTML(item)}</li>`).join("")
             : "";
 
-        showResult("scamResult", `
+        showResult("scamResult",`
             <strong>${escapeHTML(data.result || "Analysis complete")}</strong>
             <p>${escapeHTML(data.message || "")}</p>
             <p>Risk: ${escapeHTML(data.risk || "Not specified")}</p>
             ${indicators ? `<ul>${indicators}</ul>` : ""}
         `);
-    } catch (error) {
-        showResult("scamResult", escapeHTML(error.message));
+
+    }catch(error){
+        showResult("scamResult",escapeHTML(error.message));
     }
 }
 
-async function askAssistant() {
-    const message = document.getElementById("assistantMessage").value.trim();
+/* AI ASSISTANT */
 
-    if (!message) {
-        showResult("assistantResult", "Please enter your question.");
+async function askAssistant(){
+
+    const message=document.getElementById("assistantMessage").value.trim();
+
+    if(!message){
+        showResult("assistantResult","Please enter your question.");
         return;
     }
 
-    showResult("assistantResult", "CyberSaathi is responding...");
+    showResult("assistantResult","CyberSaathi is responding...");
 
-    try {
-        const data = await apiRequest("/api/assistant", {
-            method: "POST",
-            body: JSON.stringify({message})
+    try{
+        const data=await apiRequest("/api/assistant",{
+            method:"POST",
+            body:JSON.stringify({message})
         });
 
-        showResult("assistantResult", escapeHTML(data.reply || data.message || "No response received."));
-    } catch (error) {
-        showResult("assistantResult", escapeHTML(error.message));
+        showResult(
+            "assistantResult",
+            escapeHTML(data.reply || data.message || "No response received.")
+        );
+
+    }catch(error){
+        showResult("assistantResult",escapeHTML(error.message));
     }
 }
 
-async function loadTip() {
-    const tipElement = document.getElementById("dailyTip");
-    tipElement.textContent = "Loading safety tip...";
+/* DAILY TIP */
 
-    try {
-        const data = await apiRequest("/api/tips");
-        tipElement.textContent = data.tip || "Never share your OTP or password with anyone.";
-    } catch (error) {
-        tipElement.textContent = "Stay alert. Never click suspicious links or share confidential information.";
+async function loadTip(){
+
+    const tipElement=document.getElementById("dailyTip");
+
+    tipElement.textContent="Loading safety tip...";
+
+    try{
+        const data=await apiRequest("/api/tips");
+
+        tipElement.textContent=data.tip ||
+            "Never share your OTP or password with anyone.";
+
+    }catch(error){
+        tipElement.textContent=
+            "Stay alert. Never click suspicious links or share confidential information.";
     }
 }
 
-document.getElementById("complaintForm").addEventListener("submit", async event => {
+/* COMPLAINT SUBMISSION */
+
+document.getElementById("complaintForm").addEventListener("submit",async event=>{
+
     event.preventDefault();
 
-    const payload = {
-        complaint_type: document.getElementById("complaintType").value,
-        incident_date: document.getElementById("incidentDate").value,
-        description: document.getElementById("complaintDescription").value.trim()
+    const payload={
+        complaint_type:document.getElementById("complaintType").value,
+        incident_date:document.getElementById("incidentDate").value,
+        description:document.getElementById("complaintDescription").value.trim()
     };
 
-    showResult("complaintResult", "Submitting your report...");
+    showResult("complaintResult","Submitting your report...");
 
-    try {
-        const data = await apiRequest("/api/complaints", {
-            method: "POST",
-            body: JSON.stringify(payload)
+    try{
+
+        const data=await apiRequest("/api/complaints",{
+            method:"POST",
+            body:JSON.stringify(payload)
         });
 
-        showResult("complaintResult", `
+        showResult("complaintResult",`
             <strong>Report submitted.</strong>
             <p>${escapeHTML(data.message || "Your report has been received.")}</p>
             <p>Reference: <strong>${escapeHTML(data.reference || "Not provided")}</strong></p>
@@ -846,27 +949,33 @@ document.getElementById("complaintForm").addEventListener("submit", async event 
         `);
 
         event.target.reset();
-    } catch (error) {
-        showResult("complaintResult", escapeHTML(error.message));
+
+    }catch(error){
+        showResult("complaintResult",escapeHTML(error.message));
     }
+
 });
 
-async function trackComplaint() {
-    const reference = document.getElementById("referenceNumber").value.trim();
+/* COMPLAINT TRACKING */
 
-    if (!reference) {
-        showResult("trackingResult", "Please enter your reference number.");
+async function trackComplaint(){
+
+    const reference=document.getElementById("referenceNumber").value.trim();
+
+    if(!reference){
+        showResult("trackingResult","Please enter your reference number.");
         return;
     }
 
-    showResult("trackingResult", "Checking report status...");
+    showResult("trackingResult","Checking report status...");
 
-    try {
-        const data = await apiRequest(
-            "/api/complaints/" + encodeURIComponent(reference)
+    try{
+
+        const data=await apiRequest(
+            "/api/complaints/"+encodeURIComponent(reference)
         );
 
-        showResult("trackingResult", `
+        showResult("trackingResult",`
             <h3>Report Details</h3>
             <p>Reference: ${escapeHTML(data.reference || reference)}</p>
             <p>Type: ${escapeHTML(data.complaint_type || "Not available")}</p>
@@ -874,12 +983,219 @@ async function trackComplaint() {
             <p>Status: <strong>${escapeHTML(data.status || "Pending")}</strong></p>
             ${data.admin_note ? `<p>Admin Note: ${escapeHTML(data.admin_note)}</p>` : ""}
         `);
-    } catch (error) {
-        showResult("trackingResult", escapeHTML(error.message));
+
+    }catch(error){
+        showResult("trackingResult",escapeHTML(error.message));
     }
 }
+
+/* CYBER SAFETY QUIZ */
+
+const cyberQuizQuestions=[
+{
+question:"What should you do if you receive a suspicious link?",
+options:[
+"Click it immediately",
+"Share it with friends",
+"Avoid clicking and verify the sender",
+"Enter your password"
+],
+answer:2,
+explanation:"Always verify suspicious links before opening them."
+},
+{
+question:"Should you share your OTP with anyone?",
+options:[
+"Yes, with strangers",
+"Yes, with callers claiming to be bank staff",
+"Only on social media",
+"No, never share your OTP"
+],
+answer:3,
+explanation:"Your OTP is confidential. Never share it with anyone."
+},
+{
+question:"Which password is generally stronger?",
+options:[
+"123456",
+"password",
+"A long, unique password",
+"Your birth date"
+],
+answer:2,
+explanation:"Use long, unique passwords that are difficult to guess."
+},
+{
+question:"What is phishing?",
+options:[
+"A computer game",
+"A trick to steal sensitive information",
+"A software update",
+"A search engine"
+],
+answer:1,
+explanation:"Phishing uses deceptive messages or websites to steal information."
+},
+{
+question:"Which number is India's cyber financial fraud helpline?",
+options:[
+"100",
+"101",
+"1930",
+"108"
+],
+answer:2,
+explanation:"1930 is India's helpline for reporting cyber financial fraud."
+}
+];
+
+let quizIndex=0;
+let quizPoints=0;
+let quizAnswered=false;
+
+function startCyberQuiz(){
+
+    quizIndex=0;
+    quizPoints=0;
+    quizAnswered=false;
+
+    document.getElementById("quizContent").style.display="block";
+    document.getElementById("quizFinal").style.display="none";
+
+    displayQuizQuestion();
+}
+
+function displayQuizQuestion(){
+
+    const q=cyberQuizQuestions[quizIndex];
+
+    quizAnswered=false;
+
+    document.getElementById("quizQuestion").textContent=
+        `Question ${quizIndex+1}: ${q.question}`;
+
+    document.getElementById("quizProgress").style.width=
+        `${(quizIndex/cyberQuizQuestions.length)*100}%`;
+
+    document.getElementById("quizFeedback").textContent="";
+
+    const nextButton=document.getElementById("quizNext");
+
+    nextButton.disabled=true;
+    nextButton.textContent="Next Question →";
+
+    const optionsContainer=document.getElementById("quizOptions");
+
+    optionsContainer.innerHTML="";
+
+    q.options.forEach((option,index)=>{
+
+        const button=document.createElement("button");
+
+        button.className="quiz-option";
+        button.textContent=option;
+
+        button.addEventListener("click",()=>{
+            selectQuizAnswer(index);
+        });
+
+        optionsContainer.appendChild(button);
+
+    });
+}
+
+function selectQuizAnswer(selected){
+
+    if(quizAnswered) return;
+
+    quizAnswered=true;
+
+    const q=cyberQuizQuestions[quizIndex];
+
+    const buttons=document.querySelectorAll(".quiz-option");
+
+    buttons.forEach((button,index)=>{
+
+        button.disabled=true;
+
+        if(index===q.answer){
+            button.classList.add("correct");
+        }
+
+        if(index===selected && selected!==q.answer){
+            button.classList.add("wrong");
+        }
+
+    });
+
+    if(selected===q.answer){
+
+        quizPoints++;
+
+        document.getElementById("quizFeedback").textContent=
+            "Correct! "+q.explanation;
+
+    }else{
+
+        document.getElementById("quizFeedback").textContent=
+            "Not quite. "+q.explanation;
+
+    }
+
+    const nextButton=document.getElementById("quizNext");
+
+    nextButton.disabled=false;
+
+    nextButton.textContent=
+        quizIndex===cyberQuizQuestions.length-1
+        ?"View My Score"
+        :"Next Question →";
+}
+
+function nextQuizQuestion(){
+
+    if(!quizAnswered) return;
+
+    quizIndex++;
+
+    if(quizIndex<cyberQuizQuestions.length){
+
+        displayQuizQuestion();
+
+    }else{
+
+        showQuizResult();
+
+    }
+}
+
+function showQuizResult(){
+
+    document.getElementById("quizContent").style.display="none";
+
+    document.getElementById("quizFinal").style.display="block";
+
+    document.getElementById("quizProgress").style.width="100%";
+
+    document.getElementById("quizScore").textContent=
+        `${quizPoints} / ${cyberQuizQuestions.length}`;
+
+    let message="Keep learning and practising cyber safety!";
+
+    if(quizPoints===5){
+        message="Excellent! You're a Cyber Safety Champion!";
+    }else if(quizPoints>=3){
+        message="Great job! You have good cyber safety awareness.";
+    }
+
+    document.getElementById("quizMessage").textContent=message;
+}
+
+/* START QUIZ */
+
+startCyberQuiz();
+
 </script>
 
 </body>
-</html>
-
+</html> 
